@@ -1,0 +1,732 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9D0D4A102DDAC3AE00534A62 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A0E2DDAC3AE00534A62 /* BluetoothManager.swift */; };
+		9D0D4A112DDAC3AE00534A62 /* MockBluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A0F2DDAC3AE00534A62 /* MockBluetoothManager.swift */; };
+		9D0D4A142DDAC3F800534A62 /* TrackerDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A132DDAC3F800534A62 /* TrackerDataModel.swift */; };
+		9D0D4A5B2DDAC5DF00534A62 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A4F2DDAC5DF00534A62 /* SettingsView.swift */; };
+		9D0D4A5C2DDAC5DF00534A62 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A512DDAC5DF00534A62 /* Helpers.swift */; };
+		9D0D4A5D2DDAC5DF00534A62 /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A522DDAC5DF00534A62 /* StatusBarView.swift */; };
+		9D0D4A5E2DDAC5DF00534A62 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A532DDAC5DF00534A62 /* MainView.swift */; };
+		9D0D4A5F2DDAC5DF00534A62 /* RippleEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A552DDAC5DF00534A62 /* RippleEffectView.swift */; };
+		9D0D4A602DDAC5DF00534A62 /* BluetoothView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A562DDAC5DF00534A62 /* BluetoothView.swift */; };
+		9D0D4A612DDAC5DF00534A62 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A572DDAC5DF00534A62 /* ContentView.swift */; };
+		9D0D4A622DDAC5DF00534A62 /* TrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */; };
+		9D0D4A632DDAC5DF00534A62 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A5A2DDAC5DF00534A62 /* ProgressView.swift */; };
+		9D0D4A682DDAC60100534A62 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A652DDAC60100534A62 /* Persistence.swift */; };
+		9D0D4A692DDAC60100534A62 /* cleanbreak.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A662DDAC60100534A62 /* cleanbreak.xcdatamodeld */; };
+		9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6002DDAAD1E00211506 /* VetraApp.swift */; };
+		9D3CB6052DDAAD2100211506 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D3CB6042DDAAD2100211506 /* Assets.xcassets */; };
+		9D3CB6082DDAAD2100211506 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D3CB6072DDAAD2100211506 /* Preview Assets.xcassets */; };
+		9D3CB6192DDAAD2200211506 /* VetraAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6182DDAAD2200211506 /* VetraAppTests.swift */; };
+		9D3CB6232DDAAD2200211506 /* VetraAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */; };
+		9D3CB6252DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9D3CB6152DDAAD2200211506 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9D3CB5F52DDAAD1E00211506 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9D3CB5FC2DDAAD1E00211506;
+			remoteInfo = VetraApp;
+		};
+		9D3CB61F2DDAAD2200211506 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9D3CB5F52DDAAD1E00211506 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9D3CB5FC2DDAAD1E00211506;
+			remoteInfo = VetraApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		9D0D4A0E2DDAC3AE00534A62 /* BluetoothManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
+		9D0D4A0F2DDAC3AE00534A62 /* MockBluetoothManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockBluetoothManager.swift; sourceTree = "<group>"; };
+		9D0D4A132DDAC3F800534A62 /* TrackerDataModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackerDataModel.swift; sourceTree = "<group>"; };
+		9D0D4A4F2DDAC5DF00534A62 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		9D0D4A512DDAC5DF00534A62 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		9D0D4A522DDAC5DF00534A62 /* StatusBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
+		9D0D4A532DDAC5DF00534A62 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		9D0D4A552DDAC5DF00534A62 /* RippleEffectView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RippleEffectView.swift; sourceTree = "<group>"; };
+		9D0D4A562DDAC5DF00534A62 /* BluetoothView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothView.swift; sourceTree = "<group>"; };
+		9D0D4A572DDAC5DF00534A62 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackerView.swift; sourceTree = "<group>"; };
+		9D0D4A5A2DDAC5DF00534A62 /* ProgressView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		9D0D4A652DDAC60100534A62 /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		9D0D4A672DDAC60100534A62 /* cleanbreak.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = cleanbreak.xcdatamodel; sourceTree = "<group>"; };
+		9D3CB5FD2DDAAD1E00211506 /* VetraApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VetraApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D3CB6002DDAAD1E00211506 /* VetraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraApp.swift; sourceTree = "<group>"; };
+		9D3CB6042DDAAD2100211506 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9D3CB6072DDAAD2100211506 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		9D3CB60E2DDAAD2100211506 /* VetraApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VetraApp.entitlements; sourceTree = "<group>"; };
+		9D3CB60F2DDAAD2100211506 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9D3CB6142DDAAD2200211506 /* VetraAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VetraAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D3CB6182DDAAD2200211506 /* VetraAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppTests.swift; sourceTree = "<group>"; };
+		9D3CB61E2DDAAD2200211506 /* VetraAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VetraAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITests.swift; sourceTree = "<group>"; };
+		9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9D3CB5FA2DDAAD1E00211506 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D3CB6112DDAAD2200211506 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D3CB61B2DDAAD2200211506 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9D0D4A0D2DDAC3AE00534A62 /* Bluetooth */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A0E2DDAC3AE00534A62 /* BluetoothManager.swift */,
+				9D0D4A0F2DDAC3AE00534A62 /* MockBluetoothManager.swift */,
+			);
+			path = Bluetooth;
+			sourceTree = "<group>";
+		};
+		9D0D4A122DDAC3F800534A62 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A132DDAC3F800534A62 /* TrackerDataModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		9D0D4A4D2DDAC5DF00534A62 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A4E2DDAC5DF00534A62 /* SettingsView */,
+				9D0D4A502DDAC5DF00534A62 /* MainView */,
+				9D0D4A542DDAC5DF00534A62 /* BluetoothView */,
+				9D0D4A572DDAC5DF00534A62 /* ContentView.swift */,
+				9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */,
+				9D0D4A592DDAC5DF00534A62 /* ProgressView */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		9D0D4A4E2DDAC5DF00534A62 /* SettingsView */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A4F2DDAC5DF00534A62 /* SettingsView.swift */,
+			);
+			path = SettingsView;
+			sourceTree = "<group>";
+		};
+		9D0D4A502DDAC5DF00534A62 /* MainView */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A512DDAC5DF00534A62 /* Helpers.swift */,
+				9D0D4A522DDAC5DF00534A62 /* StatusBarView.swift */,
+				9D0D4A532DDAC5DF00534A62 /* MainView.swift */,
+			);
+			path = MainView;
+			sourceTree = "<group>";
+		};
+		9D0D4A542DDAC5DF00534A62 /* BluetoothView */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A552DDAC5DF00534A62 /* RippleEffectView.swift */,
+				9D0D4A562DDAC5DF00534A62 /* BluetoothView.swift */,
+			);
+			path = BluetoothView;
+			sourceTree = "<group>";
+		};
+		9D0D4A592DDAC5DF00534A62 /* ProgressView */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A5A2DDAC5DF00534A62 /* ProgressView.swift */,
+			);
+			path = ProgressView;
+			sourceTree = "<group>";
+		};
+		9D0D4A642DDAC60100534A62 /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A652DDAC60100534A62 /* Persistence.swift */,
+				9D0D4A662DDAC60100534A62 /* cleanbreak.xcdatamodeld */,
+			);
+			path = CoreData;
+			sourceTree = "<group>";
+		};
+		9D3CB5F42DDAAD1E00211506 = {
+			isa = PBXGroup;
+			children = (
+				9D3CB5FF2DDAAD1E00211506 /* VetraApp */,
+				9D3CB6172DDAAD2200211506 /* VetraAppTests */,
+				9D3CB6212DDAAD2200211506 /* VetraAppUITests */,
+				9D3CB5FE2DDAAD1E00211506 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9D3CB5FE2DDAAD1E00211506 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9D3CB5FD2DDAAD1E00211506 /* VetraApp.app */,
+				9D3CB6142DDAAD2200211506 /* VetraAppTests.xctest */,
+				9D3CB61E2DDAAD2200211506 /* VetraAppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9D3CB5FF2DDAAD1E00211506 /* VetraApp */ = {
+			isa = PBXGroup;
+			children = (
+				9D0D4A642DDAC60100534A62 /* CoreData */,
+				9D0D4A4D2DDAC5DF00534A62 /* Views */,
+				9D0D4A122DDAC3F800534A62 /* Models */,
+				9D0D4A0D2DDAC3AE00534A62 /* Bluetooth */,
+				9D3CB6002DDAAD1E00211506 /* VetraApp.swift */,
+				9D3CB6042DDAAD2100211506 /* Assets.xcassets */,
+				9D3CB60E2DDAAD2100211506 /* VetraApp.entitlements */,
+				9D3CB60F2DDAAD2100211506 /* Info.plist */,
+				9D3CB6062DDAAD2100211506 /* Preview Content */,
+			);
+			path = VetraApp;
+			sourceTree = "<group>";
+		};
+		9D3CB6062DDAAD2100211506 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				9D3CB6072DDAAD2100211506 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		9D3CB6172DDAAD2200211506 /* VetraAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				9D3CB6182DDAAD2200211506 /* VetraAppTests.swift */,
+			);
+			path = VetraAppTests;
+			sourceTree = "<group>";
+		};
+		9D3CB6212DDAAD2200211506 /* VetraAppUITests */ = {
+			isa = PBXGroup;
+			children = (
+				9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */,
+				9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */,
+			);
+			path = VetraAppUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9D3CB5FC2DDAAD1E00211506 /* VetraApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9D3CB6282DDAAD2200211506 /* Build configuration list for PBXNativeTarget "VetraApp" */;
+			buildPhases = (
+				9D3CB5F92DDAAD1E00211506 /* Sources */,
+				9D3CB5FA2DDAAD1E00211506 /* Frameworks */,
+				9D3CB5FB2DDAAD1E00211506 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VetraApp;
+			productName = VetraApp;
+			productReference = 9D3CB5FD2DDAAD1E00211506 /* VetraApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9D3CB6132DDAAD2200211506 /* VetraAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9D3CB62B2DDAAD2200211506 /* Build configuration list for PBXNativeTarget "VetraAppTests" */;
+			buildPhases = (
+				9D3CB6102DDAAD2200211506 /* Sources */,
+				9D3CB6112DDAAD2200211506 /* Frameworks */,
+				9D3CB6122DDAAD2200211506 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9D3CB6162DDAAD2200211506 /* PBXTargetDependency */,
+			);
+			name = VetraAppTests;
+			productName = VetraAppTests;
+			productReference = 9D3CB6142DDAAD2200211506 /* VetraAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		9D3CB61D2DDAAD2200211506 /* VetraAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9D3CB62E2DDAAD2200211506 /* Build configuration list for PBXNativeTarget "VetraAppUITests" */;
+			buildPhases = (
+				9D3CB61A2DDAAD2200211506 /* Sources */,
+				9D3CB61B2DDAAD2200211506 /* Frameworks */,
+				9D3CB61C2DDAAD2200211506 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9D3CB6202DDAAD2200211506 /* PBXTargetDependency */,
+			);
+			name = VetraAppUITests;
+			productName = VetraAppUITests;
+			productReference = 9D3CB61E2DDAAD2200211506 /* VetraAppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9D3CB5F52DDAAD1E00211506 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					9D3CB5FC2DDAAD1E00211506 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					9D3CB6132DDAAD2200211506 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = 9D3CB5FC2DDAAD1E00211506;
+					};
+					9D3CB61D2DDAAD2200211506 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = 9D3CB5FC2DDAAD1E00211506;
+					};
+				};
+			};
+			buildConfigurationList = 9D3CB5F82DDAAD1E00211506 /* Build configuration list for PBXProject "VetraApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9D3CB5F42DDAAD1E00211506;
+			productRefGroup = 9D3CB5FE2DDAAD1E00211506 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9D3CB5FC2DDAAD1E00211506 /* VetraApp */,
+				9D3CB6132DDAAD2200211506 /* VetraAppTests */,
+				9D3CB61D2DDAAD2200211506 /* VetraAppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9D3CB5FB2DDAAD1E00211506 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D3CB6082DDAAD2100211506 /* Preview Assets.xcassets in Resources */,
+				9D3CB6052DDAAD2100211506 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D3CB6122DDAAD2200211506 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D3CB61C2DDAAD2200211506 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9D3CB5F92DDAAD1E00211506 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D0D4A5B2DDAC5DF00534A62 /* SettingsView.swift in Sources */,
+				9D0D4A142DDAC3F800534A62 /* TrackerDataModel.swift in Sources */,
+				9D0D4A632DDAC5DF00534A62 /* ProgressView.swift in Sources */,
+				9D0D4A682DDAC60100534A62 /* Persistence.swift in Sources */,
+				9D0D4A102DDAC3AE00534A62 /* BluetoothManager.swift in Sources */,
+				9D0D4A5E2DDAC5DF00534A62 /* MainView.swift in Sources */,
+				9D0D4A5D2DDAC5DF00534A62 /* StatusBarView.swift in Sources */,
+				9D0D4A5C2DDAC5DF00534A62 /* Helpers.swift in Sources */,
+				9D0D4A692DDAC60100534A62 /* cleanbreak.xcdatamodeld in Sources */,
+				9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */,
+				9D0D4A602DDAC5DF00534A62 /* BluetoothView.swift in Sources */,
+				9D0D4A112DDAC3AE00534A62 /* MockBluetoothManager.swift in Sources */,
+				9D0D4A622DDAC5DF00534A62 /* TrackerView.swift in Sources */,
+				9D0D4A5F2DDAC5DF00534A62 /* RippleEffectView.swift in Sources */,
+				9D0D4A612DDAC5DF00534A62 /* ContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D3CB6102DDAAD2200211506 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D3CB6192DDAAD2200211506 /* VetraAppTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D3CB61A2DDAAD2200211506 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D3CB6252DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift in Sources */,
+				9D3CB6232DDAAD2200211506 /* VetraAppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9D3CB6162DDAAD2200211506 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9D3CB5FC2DDAAD1E00211506 /* VetraApp */;
+			targetProxy = 9D3CB6152DDAAD2200211506 /* PBXContainerItemProxy */;
+		};
+		9D3CB6202DDAAD2200211506 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9D3CB5FC2DDAAD1E00211506 /* VetraApp */;
+			targetProxy = 9D3CB61F2DDAAD2200211506 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		9D3CB6262DDAAD2200211506 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		9D3CB6272DDAAD2200211506 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9D3CB6292DDAAD2200211506 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = VetraApp/VetraApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"VetraApp/Preview Content\"";
+				DEVELOPMENT_TEAM = 9KZ4CCANYU;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VetraApp/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to connect to your Vetra Vape and monitor and restrict it's usage.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Vetra.VetraApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9D3CB62A2DDAAD2200211506 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = VetraApp/VetraApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"VetraApp/Preview Content\"";
+				DEVELOPMENT_TEAM = 9KZ4CCANYU;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VetraApp/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to connect to your Vetra Vape and monitor and restrict it's usage.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Vetra.VetraApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9D3CB62C2DDAAD2200211506 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9KZ4CCANYU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Vetra.VetraAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VetraApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VetraApp";
+			};
+			name = Debug;
+		};
+		9D3CB62D2DDAAD2200211506 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9KZ4CCANYU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Vetra.VetraAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VetraApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VetraApp";
+			};
+			name = Release;
+		};
+		9D3CB62F2DDAAD2200211506 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9KZ4CCANYU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Vetra.VetraAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = VetraApp;
+			};
+			name = Debug;
+		};
+		9D3CB6302DDAAD2200211506 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9KZ4CCANYU;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Vetra.VetraAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = VetraApp;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9D3CB5F82DDAAD1E00211506 /* Build configuration list for PBXProject "VetraApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D3CB6262DDAAD2200211506 /* Debug */,
+				9D3CB6272DDAAD2200211506 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9D3CB6282DDAAD2200211506 /* Build configuration list for PBXNativeTarget "VetraApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D3CB6292DDAAD2200211506 /* Debug */,
+				9D3CB62A2DDAAD2200211506 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9D3CB62B2DDAAD2200211506 /* Build configuration list for PBXNativeTarget "VetraAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D3CB62C2DDAAD2200211506 /* Debug */,
+				9D3CB62D2DDAAD2200211506 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9D3CB62E2DDAAD2200211506 /* Build configuration list for PBXNativeTarget "VetraAppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9D3CB62F2DDAAD2200211506 /* Debug */,
+				9D3CB6302DDAAD2200211506 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		9D0D4A662DDAC60100534A62 /* cleanbreak.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				9D0D4A672DDAC60100534A62 /* cleanbreak.xcdatamodel */,
+			);
+			currentVersion = 9D0D4A672DDAC60100534A62 /* cleanbreak.xcdatamodel */;
+			path = cleanbreak.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 9D3CB5F52DDAAD1E00211506 /* Project object */;
+}

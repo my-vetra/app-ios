@@ -1,0 +1,61 @@
+# ┌─────────────────────────────
+# │ Xcode
+# └─────────────────────────────
+# Build products
+build/
+DerivedData/
+
+# User-specific Xcode files
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad
+
+# Scheme management
+*.xcscmblueprint
+
+# Workspaces (if you ever generate one)
+*.xcworkspace
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# ┌─────────────────────────────
+# │ Swift Package Manager
+# └─────────────────────────────
+.build/
+Packages/
+.swiftpm/
+
+# ┌─────────────────────────────
+# │ CocoaPods
+# └─────────────────────────────
+Pods/
+
+# ┌─────────────────────────────
+# │ Carthage
+# └─────────────────────────────
+Carthage/Build/
+
+# ┌─────────────────────────────
+# │ Fastlane
+# └─────────────────────────────
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+
+# ┌─────────────────────────────
+# │ Archives, symbols, logs
+# └─────────────────────────────
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.xcarchive
+
+# ┌─────────────────────────────
+# │ Misc
+# └─────────────────────────────
+*.hmap
+*.log
+*.orig
+
