@@ -32,7 +32,7 @@ struct ProgressView: View {
                     .padding(.horizontal)
 
                 Chart(data) { entry in
-                    BarMark(
+                    LineMark(
                         x: .value("Day", entry.date, unit: .day),
                         y: .value("Puffs", entry.puffs)
                     )
@@ -56,7 +56,7 @@ struct ProgressView: View {
                 }
                 .frame(height: 200)
                 .padding()
-                .background(Color(.darkGray))
+                .background(Color(.black))
                 .cornerRadius(12)
                 .padding(.horizontal)
 
