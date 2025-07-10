@@ -3,7 +3,7 @@ import CoreBluetooth
 
 class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @Published var isConnected = false
-    @Published var peripheralName: String = "Sylo"
+    @Published var peripheralName: String = "Vetra"
     
     // Timer data from the SYNC characteristic (in milliseconds)
     @Published var persistentDuation: CGFloat = 0    // Field 1: Persistent Timer Total (ms)

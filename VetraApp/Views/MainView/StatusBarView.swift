@@ -52,17 +52,16 @@ struct TimerArc: View {
             let strokeWidth = size * 0.05
             let totalArc: Double = 360 - gapAngle
             let startAngle: Double = -270 + (gapAngle / 2)
-            let endAngle: Double = startAngle + (Double(progress) * totalArc)
+            let midAngle: Double = startAngle + (Double(progress) * totalArc)
 
             ZStack {
-                // Background Arc (Full Outline)
-                ArcShape(startAngle: startAngle, endAngle: 90 - (gapAngle / 2))
+                // Background Arc
+                ArcShape(startAngle: min((midAngle + 10), 90 - (gapAngle / 2)), endAngle: 90 - (gapAngle / 2))
                     .stroke(color.opacity(0.4), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round))
 
                 // Foreground Progress Arc (Now updates with high precision)
-                ArcShape(startAngle: startAngle, endAngle: endAngle)
+                ArcShape(startAngle: startAngle, endAngle: midAngle)
                     .stroke(color, style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round))
-                    .animation(.easeInOut(duration: 1), value: progress) // Ensures smooth updates
                 
                 // Lock Animation at the Center (Dynamic Size)
                 Group {

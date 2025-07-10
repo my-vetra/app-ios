@@ -18,9 +18,10 @@
 		9D0D4A602DDAC5DF00534A62 /* BluetoothView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A562DDAC5DF00534A62 /* BluetoothView.swift */; };
 		9D0D4A612DDAC5DF00534A62 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A572DDAC5DF00534A62 /* ContentView.swift */; };
 		9D0D4A622DDAC5DF00534A62 /* TrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */; };
-		9D0D4A632DDAC5DF00534A62 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A5A2DDAC5DF00534A62 /* ProgressView.swift */; };
+		9D0D4A632DDAC5DF00534A62 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A5A2DDAC5DF00534A62 /* LeaderboardView.swift */; };
 		9D0D4A682DDAC60100534A62 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A652DDAC60100534A62 /* Persistence.swift */; };
 		9D0D4A692DDAC60100534A62 /* cleanbreak.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A662DDAC60100534A62 /* cleanbreak.xcdatamodeld */; };
+		9D18ACBF2DEEB53B005F38E5 /* QuitPlanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D18ACBE2DEEB53B005F38E5 /* QuitPlanningView.swift */; };
 		9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6002DDAAD1E00211506 /* VetraApp.swift */; };
 		9D3CB6052DDAAD2100211506 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D3CB6042DDAAD2100211506 /* Assets.xcassets */; };
 		9D3CB6082DDAAD2100211506 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D3CB6072DDAAD2100211506 /* Preview Assets.xcassets */; };
@@ -58,9 +59,10 @@
 		9D0D4A562DDAC5DF00534A62 /* BluetoothView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothView.swift; sourceTree = "<group>"; };
 		9D0D4A572DDAC5DF00534A62 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackerView.swift; sourceTree = "<group>"; };
-		9D0D4A5A2DDAC5DF00534A62 /* ProgressView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		9D0D4A5A2DDAC5DF00534A62 /* LeaderboardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
 		9D0D4A652DDAC60100534A62 /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		9D0D4A672DDAC60100534A62 /* cleanbreak.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = cleanbreak.xcdatamodel; sourceTree = "<group>"; };
+		9D18ACBE2DEEB53B005F38E5 /* QuitPlanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitPlanningView.swift; sourceTree = "<group>"; };
 		9D3CB5FD2DDAAD1E00211506 /* VetraApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VetraApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D3CB6002DDAAD1E00211506 /* VetraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraApp.swift; sourceTree = "<group>"; };
 		9D3CB6042DDAAD2100211506 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -124,7 +126,7 @@
 				9D0D4A542DDAC5DF00534A62 /* BluetoothView */,
 				9D0D4A572DDAC5DF00534A62 /* ContentView.swift */,
 				9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */,
-				9D0D4A592DDAC5DF00534A62 /* ProgressView */,
+				9D0D4A592DDAC5DF00534A62 /* LeaderboardView */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -156,12 +158,13 @@
 			path = BluetoothView;
 			sourceTree = "<group>";
 		};
-		9D0D4A592DDAC5DF00534A62 /* ProgressView */ = {
+		9D0D4A592DDAC5DF00534A62 /* LeaderboardView */ = {
 			isa = PBXGroup;
 			children = (
-				9D0D4A5A2DDAC5DF00534A62 /* ProgressView.swift */,
+				9D0D4A5A2DDAC5DF00534A62 /* LeaderboardView.swift */,
+				9D18ACBE2DEEB53B005F38E5 /* QuitPlanningView.swift */,
 			);
-			path = ProgressView;
+			path = LeaderboardView;
 			sourceTree = "<group>";
 		};
 		9D0D4A642DDAC60100534A62 /* CoreData */ = {
@@ -366,10 +369,11 @@
 			files = (
 				9D0D4A5B2DDAC5DF00534A62 /* SettingsView.swift in Sources */,
 				9D0D4A142DDAC3F800534A62 /* TrackerDataModel.swift in Sources */,
-				9D0D4A632DDAC5DF00534A62 /* ProgressView.swift in Sources */,
+				9D0D4A632DDAC5DF00534A62 /* LeaderboardView.swift in Sources */,
 				9D0D4A682DDAC60100534A62 /* Persistence.swift in Sources */,
 				9D0D4A102DDAC3AE00534A62 /* BluetoothManager.swift in Sources */,
 				9D0D4A5E2DDAC5DF00534A62 /* MainView.swift in Sources */,
+				9D18ACBF2DEEB53B005F38E5 /* QuitPlanningView.swift in Sources */,
 				9D0D4A5D2DDAC5DF00534A62 /* StatusBarView.swift in Sources */,
 				9D0D4A5C2DDAC5DF00534A62 /* Helpers.swift in Sources */,
 				9D0D4A692DDAC60100534A62 /* cleanbreak.xcdatamodeld in Sources */,

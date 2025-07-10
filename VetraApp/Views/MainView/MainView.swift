@@ -11,10 +11,24 @@ struct MainView: View {
         return trackerData.progress == 1 ? .green : .mint
         }    //    var color: Gradient = Gradient(colors: [Color.mint.opacity(0.8), Color.teal])
 
+       private var darkGreen: Color {
+           Color(red: 18/255, green: 24/255, blue: 22/255)
+       }
+       
+       private var darkMint: Color {
+           Color(red: 10/255, green: 20/255, blue: 18/255)
+       }
+
+       private var backgroundColor: Color {
+           trackerData.progress == 1
+               ? darkGreen
+               : darkMint
+       }
+    
     var body: some View {
         ZStack {
             // Background
-            Color.black.ignoresSafeArea()
+            backgroundColor.ignoresSafeArea()
 
             VStack {
                 Text("Connected: \(trackerData.productName)")

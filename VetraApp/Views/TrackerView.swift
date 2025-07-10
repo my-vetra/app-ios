@@ -29,7 +29,7 @@ struct TrackerView: View {
                 }
                 .tag(0)
 
-            ProgressView() // Placeholder for future long-term progress
+            LeaderboardView() // Placeholder for future long-term progress
                 .tabItem {
                     Image(systemName: "chart.bar.fill")
                     Text("Progress")
@@ -42,6 +42,12 @@ struct TrackerView: View {
                     Text("Settings")
                 }
                 .tag(2)
+            QuittingPlanView() // Placeholder for future settings page
+                .tabItem {
+                    Image(systemName: "flame.fill")
+                    Text("Quit Plan")
+                }
+                .tag(3)
         }
         .accentColor(.teal) // Set the active tab color to teal
     }
