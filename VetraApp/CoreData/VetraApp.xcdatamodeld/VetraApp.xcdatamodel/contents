@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788" systemVersion="24E263" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="ActivePhase" representedClassName=".ActivePhase" syncable="YES">
+        <attribute name="phaseIndex" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="phaseStartDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
+    <entity name="Phase" representedClassName=".Phase" syncable="YES">
+        <attribute name="duration" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="index" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="maxPuffs" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="puffsTaken" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="puff" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Puff" inverseName="phase" inverseEntity="Puff"/>
+        <relationship name="sessionLifetime" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SessionLifetime" inverseName="phases" inverseEntity="SessionLifetime"/>
+    </entity>
+    <entity name="Puff" representedClassName=".Puff" syncable="YES">
+        <attribute name="duration" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="puffNumber" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="phase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Phase" inverseName="puff" inverseEntity="Phase"/>
+    </entity>
+    <entity name="SessionLifetime" representedClassName=".SessionLifetime" syncable="YES">
+        <attribute name="phasesCompleted" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="startedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="totalPuffsTaken" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="userId" optional="YES" attributeType="String"/>
+        <relationship name="phases" optional="YES" transient="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Phase" inverseName="sessionLifetime" inverseEntity="Phase"/>
+    </entity>
+</model>

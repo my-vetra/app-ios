@@ -19,7 +19,7 @@
 		9D0D4A612DDAC5DF00534A62 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A572DDAC5DF00534A62 /* ContentView.swift */; };
 		9D0D4A622DDAC5DF00534A62 /* TrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */; };
 		9D0D4A632DDAC5DF00534A62 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A5A2DDAC5DF00534A62 /* LeaderboardView.swift */; };
-		9D0D4A692DDAC60100534A62 /* vetra.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A662DDAC60100534A62 /* vetra.xcdatamodeld */; };
+		9D0D4A692DDAC60100534A62 /* VetraApp.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A662DDAC60100534A62 /* VetraApp.xcdatamodeld */; };
 		9D18ACBF2DEEB53B005F38E5 /* QuitPlanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D18ACBE2DEEB53B005F38E5 /* QuitPlanningView.swift */; };
 		9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6002DDAAD1E00211506 /* VetraApp.swift */; };
 		9D3CB6052DDAAD2100211506 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D3CB6042DDAAD2100211506 /* Assets.xcassets */; };
@@ -28,31 +28,15 @@
 		9D3CB6232DDAAD2200211506 /* VetraAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */; };
 		9D3CB6252DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */; };
 		EF3F05512E1F6A84006BB0BB /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05502E1F6A79006BB0BB /* Model.swift */; };
-		EF3F05AA2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A22E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift */; };
-		EF3F05AB2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A32E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift */; };
-		EF3F05AE2E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A62E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift */; };
-		EF3F05AF2E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A72E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift */; };
-		EF3F05B02E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A82E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift */; };
-		EF3F05B12E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A92E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift */; };
-		EF3F05B22E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A22E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift */; };
-		EF3F05B32E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A32E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift */; };
-		EF3F05B62E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A62E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift */; };
-		EF3F05B72E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A72E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift */; };
-		EF3F05B82E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A82E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift */; };
-		EF3F05B92E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A92E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift */; };
-		EF3F05BA2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A22E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift */; };
-		EF3F05BB2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A32E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift */; };
-		EF3F05BE2E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A62E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift */; };
-		EF3F05BF2E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A72E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift */; };
-		EF3F05C02E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A82E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift */; };
-		EF3F05C12E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05A92E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift */; };
 		EF3F05C32E1F7416006BB0BB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C22E1F740C006BB0BB /* Persistence.swift */; };
-		EF3F05C62E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C42E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift */; };
-		EF3F05C72E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C52E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift */; };
-		EF3F05C82E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C42E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift */; };
-		EF3F05C92E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C52E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift */; };
-		EF3F05CA2E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C42E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift */; };
-		EF3F05CB2E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C52E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift */; };
+		EF492D8B2E21C80700E6258E /* ActivePhase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */; };
+		EF492D8C2E21C80700E6258E /* ActivePhase+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D842E21C80700E6258E /* ActivePhase+CoreDataProperties.swift */; };
+		EF492D8D2E21C80700E6258E /* Phase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D852E21C80700E6258E /* Phase+CoreDataClass.swift */; };
+		EF492D8E2E21C80700E6258E /* Phase+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D862E21C80700E6258E /* Phase+CoreDataProperties.swift */; };
+		EF492D8F2E21C80700E6258E /* Puff+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D872E21C80700E6258E /* Puff+CoreDataClass.swift */; };
+		EF492D902E21C80700E6258E /* Puff+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D882E21C80700E6258E /* Puff+CoreDataProperties.swift */; };
+		EF492D912E21C80700E6258E /* SessionLifetime+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D892E21C80700E6258E /* SessionLifetime+CoreDataClass.swift */; };
+		EF492D922E21C80700E6258E /* SessionLifetime+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D8A2E21C80700E6258E /* SessionLifetime+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,7 +69,7 @@
 		9D0D4A572DDAC5DF00534A62 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9D0D4A582DDAC5DF00534A62 /* TrackerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackerView.swift; sourceTree = "<group>"; };
 		9D0D4A5A2DDAC5DF00534A62 /* LeaderboardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
-		9D0D4A672DDAC60100534A62 /* vetra.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = vetra.xcdatamodel; sourceTree = "<group>"; };
+		9D0D4A672DDAC60100534A62 /* VetraApp.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = VetraApp.xcdatamodel; sourceTree = "<group>"; };
 		9D18ACBE2DEEB53B005F38E5 /* QuitPlanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitPlanningView.swift; sourceTree = "<group>"; };
 		9D3CB5FD2DDAAD1E00211506 /* VetraApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VetraApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D3CB6002DDAAD1E00211506 /* VetraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraApp.swift; sourceTree = "<group>"; };
@@ -99,15 +83,15 @@
 		9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITests.swift; sourceTree = "<group>"; };
 		9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		EF3F05502E1F6A79006BB0BB /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
-		EF3F05A22E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivePhasesEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
-		EF3F05A32E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivePhasesEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		EF3F05A62E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PuffEntryEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
-		EF3F05A72E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PuffEntryEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		EF3F05A82E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionLifetimeEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
-		EF3F05A92E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionLifetimeEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		EF3F05C22E1F740C006BB0BB /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
-		EF3F05C42E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhaseEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
-		EF3F05C52E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhaseEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivePhase+CoreDataClass.swift"; sourceTree = "<group>"; };
+		EF492D842E21C80700E6258E /* ActivePhase+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivePhase+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		EF492D852E21C80700E6258E /* Phase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Phase+CoreDataClass.swift"; sourceTree = "<group>"; };
+		EF492D862E21C80700E6258E /* Phase+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Phase+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		EF492D872E21C80700E6258E /* Puff+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Puff+CoreDataClass.swift"; sourceTree = "<group>"; };
+		EF492D882E21C80700E6258E /* Puff+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Puff+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		EF492D892E21C80700E6258E /* SessionLifetime+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionLifetime+CoreDataClass.swift"; sourceTree = "<group>"; };
+		EF492D8A2E21C80700E6258E /* SessionLifetime+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionLifetime+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,7 +190,7 @@
 			children = (
 				EF3F05C22E1F740C006BB0BB /* Persistence.swift */,
 				EF3F05502E1F6A79006BB0BB /* Model.swift */,
-				9D0D4A662DDAC60100534A62 /* vetra.xcdatamodeld */,
+				9D0D4A662DDAC60100534A62 /* VetraApp.xcdatamodeld */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -214,14 +198,14 @@
 		9D3CB5F42DDAAD1E00211506 = {
 			isa = PBXGroup;
 			children = (
-				EF3F05C42E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift */,
-				EF3F05C52E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift */,
-				EF3F05A22E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift */,
-				EF3F05A32E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift */,
-				EF3F05A62E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift */,
-				EF3F05A72E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift */,
-				EF3F05A82E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift */,
-				EF3F05A92E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift */,
+				EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */,
+				EF492D842E21C80700E6258E /* ActivePhase+CoreDataProperties.swift */,
+				EF492D852E21C80700E6258E /* Phase+CoreDataClass.swift */,
+				EF492D862E21C80700E6258E /* Phase+CoreDataProperties.swift */,
+				EF492D872E21C80700E6258E /* Puff+CoreDataClass.swift */,
+				EF492D882E21C80700E6258E /* Puff+CoreDataProperties.swift */,
+				EF492D892E21C80700E6258E /* SessionLifetime+CoreDataClass.swift */,
+				EF492D8A2E21C80700E6258E /* SessionLifetime+CoreDataProperties.swift */,
 				9D3CB5FF2DDAAD1E00211506 /* VetraApp */,
 				9D3CB6172DDAAD2200211506 /* VetraAppTests */,
 				9D3CB6212DDAAD2200211506 /* VetraAppUITests */,
@@ -411,25 +395,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D0D4A5B2DDAC5DF00534A62 /* SettingsView.swift in Sources */,
-				EF3F05AA2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift in Sources */,
-				EF3F05AB2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift in Sources */,
-				EF3F05AE2E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift in Sources */,
-				EF3F05AF2E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift in Sources */,
-				EF3F05B02E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift in Sources */,
-				EF3F05B12E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift in Sources */,
 				9D0D4A142DDAC3F800534A62 /* TrackerDataModel.swift in Sources */,
 				9D0D4A632DDAC5DF00534A62 /* LeaderboardView.swift in Sources */,
 				9D0D4A102DDAC3AE00534A62 /* BluetoothManager.swift in Sources */,
 				9D0D4A5E2DDAC5DF00534A62 /* MainView.swift in Sources */,
 				9D18ACBF2DEEB53B005F38E5 /* QuitPlanningView.swift in Sources */,
-				EF3F05C62E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift in Sources */,
-				EF3F05C72E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift in Sources */,
 				9D0D4A5D2DDAC5DF00534A62 /* StatusBarView.swift in Sources */,
 				9D0D4A5C2DDAC5DF00534A62 /* Helpers.swift in Sources */,
-				9D0D4A692DDAC60100534A62 /* vetra.xcdatamodeld in Sources */,
+				9D0D4A692DDAC60100534A62 /* VetraApp.xcdatamodeld in Sources */,
 				EF3F05512E1F6A84006BB0BB /* Model.swift in Sources */,
 				9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */,
 				EF3F05C32E1F7416006BB0BB /* Persistence.swift in Sources */,
+				EF492D8B2E21C80700E6258E /* ActivePhase+CoreDataClass.swift in Sources */,
+				EF492D8C2E21C80700E6258E /* ActivePhase+CoreDataProperties.swift in Sources */,
+				EF492D8D2E21C80700E6258E /* Phase+CoreDataClass.swift in Sources */,
+				EF492D8E2E21C80700E6258E /* Phase+CoreDataProperties.swift in Sources */,
+				EF492D8F2E21C80700E6258E /* Puff+CoreDataClass.swift in Sources */,
+				EF492D902E21C80700E6258E /* Puff+CoreDataProperties.swift in Sources */,
+				EF492D912E21C80700E6258E /* SessionLifetime+CoreDataClass.swift in Sources */,
+				EF492D922E21C80700E6258E /* SessionLifetime+CoreDataProperties.swift in Sources */,
 				9D0D4A602DDAC5DF00534A62 /* BluetoothView.swift in Sources */,
 				9D0D4A112DDAC3AE00534A62 /* MockBluetoothManager.swift in Sources */,
 				9D0D4A622DDAC5DF00534A62 /* TrackerView.swift in Sources */,
@@ -442,14 +426,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EF3F05B22E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift in Sources */,
-				EF3F05B32E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift in Sources */,
-				EF3F05B62E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift in Sources */,
-				EF3F05B72E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift in Sources */,
-				EF3F05C82E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift in Sources */,
-				EF3F05C92E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift in Sources */,
-				EF3F05B82E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift in Sources */,
-				EF3F05B92E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift in Sources */,
 				9D3CB6192DDAAD2200211506 /* VetraAppTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -459,14 +435,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D3CB6252DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift in Sources */,
-				EF3F05BA2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataClass.swift in Sources */,
-				EF3F05BB2E1F7389006BB0BB /* ActivePhasesEntity+CoreDataProperties.swift in Sources */,
-				EF3F05BE2E1F7389006BB0BB /* PuffEntryEntity+CoreDataClass.swift in Sources */,
-				EF3F05BF2E1F7389006BB0BB /* PuffEntryEntity+CoreDataProperties.swift in Sources */,
-				EF3F05C02E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataClass.swift in Sources */,
-				EF3F05CA2E1F758C006BB0BB /* PhaseEntity+CoreDataClass.swift in Sources */,
-				EF3F05CB2E1F758C006BB0BB /* PhaseEntity+CoreDataProperties.swift in Sources */,
-				EF3F05C12E1F7389006BB0BB /* SessionLifetimeEntity+CoreDataProperties.swift in Sources */,
 				9D3CB6232DDAAD2200211506 /* VetraAppUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -780,13 +748,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		9D0D4A662DDAC60100534A62 /* vetra.xcdatamodeld */ = {
+		9D0D4A662DDAC60100534A62 /* VetraApp.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				9D0D4A672DDAC60100534A62 /* vetra.xcdatamodel */,
+				9D0D4A672DDAC60100534A62 /* VetraApp.xcdatamodel */,
 			);
-			currentVersion = 9D0D4A672DDAC60100534A62 /* vetra.xcdatamodel */;
-			path = vetra.xcdatamodeld;
+			currentVersion = 9D0D4A672DDAC60100534A62 /* VetraApp.xcdatamodel */;
+			path = VetraApp.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

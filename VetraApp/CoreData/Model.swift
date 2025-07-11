@@ -7,73 +7,84 @@ import Charts
 
 // MARK: - Models (Pure Swift)
 
-struct Phase: Identifiable {
-    let id: UUID
-    let index: Int
-    let duration: TimeInterval
-    let maxPuffs: Int
-}
-
-struct PuffEntry: Identifiable {
-    let id: UUID
+struct PuffModel: Identifiable {
+    let puffNumber: Int
     let timestamp: Date
     let duration: TimeInterval
-    let phaseIndex: Int
+    var id: Int { puffNumber }
 }
 
-struct SessionLifetime {
-    let sessionId: UUID
+struct PhaseModel: Identifiable {
+    let phaseIndex: Int
+    let duration: TimeInterval
+    let maxPuffs: Int
+    var puffsTaken: [PuffModel]
+    var id: Int { phaseIndex }
+}
+
+struct SessionLifetimeModel: Identifiable {
     let userId: String
-    let allPhases: [Phase]
+    let allPhases: [PhaseModel]
     let startedAt: Date
     var totalPuffsTaken: Int
     var phasesCompleted: Int
+    var id: String { userId }
 }
 
-struct ActivePhase {
+struct ActivePhaseModel {
     let phaseIndex: Int
     var phaseStartDate: Date
-    var puffsTaken: Int
 }
 
 protocol PhaseRepositoryProtocol {
-  func fetchPhases() -> AnyPublisher<[Phase], Never>
+  func fetchPhases() -> AnyPublisher<[PhaseModel], Never>
 }
 protocol SessionLifetimeRepositoryProtocol {
-  func loadSession() -> AnyPublisher<SessionLifetime, Never>
+  func loadSession() -> AnyPublisher<SessionLifetimeModel, Never>
 }
 protocol ActivePhaseRepositoryProtocol {
-  func loadActivePhase() -> AnyPublisher<ActivePhase, Never>
-  func saveActivePhase(_ active: ActivePhase)
+  func loadActivePhase() -> AnyPublisher<ActivePhaseModel, Never>
+  func saveActivePhase(_ active: ActivePhaseModel)
 }
 protocol PuffRepositoryProtocol {
-  func loadPuffs() -> AnyPublisher<[PuffEntry], Never>
-  func addPuff(_ puff: PuffEntry)
+  func loadPuffs() -> AnyPublisher<[PuffModel], Never>
+  func addPuff(_ puff: PuffModel)
 }
 
 
-// MARK: - Core Data Persistence Controller
-
+// Shared Core Data context
 let viewContext = PersistenceController.shared.container.viewContext
 
-// MARK: - Core Data Repositories
+// MARK: - PhaseRepositoryCoreData
 
 class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
-    func fetchPhases() -> AnyPublisher<[Phase], Never> {
+    func fetchPhases() -> AnyPublisher<[PhaseModel], Never> {
         Future { promise in
-            let req: NSFetchRequest<PhaseEntity> = PhaseEntity.fetchRequest()
-            req.sortDescriptors = [NSSortDescriptor(keyPath: \PhaseEntity.index, ascending: true)]
+            let request: NSFetchRequest<Phase> = Phase.fetchRequest()
+            request.sortDescriptors = [NSSortDescriptor(keyPath: \Phase.index, ascending: true)]
+
             do {
-                let entities = try viewContext.fetch(req)
-                let phases = entities.map { ent in
-                    Phase(id: ent.id ?? UUID(),
-                          index: Int(ent.index),
-                          duration: ent.duration,
-                          maxPuffs: Int(ent.maxPuffs))
+                let phaseEntities = try viewContext.fetch(request)
+                let phases: [PhaseModel] = phaseEntities.map { entity in
+                    let puffs = (entity.puff?.array as? [Puff] ?? []).map { puff in
+                        PuffModel(
+                            puffNumber: Int(puff.puffNumber),
+                            timestamp: puff.timestamp ?? Date(),
+                            duration: puff.duration
+                        )
+                    }
+
+                    return PhaseModel(
+                        phaseIndex: Int(entity.index),
+                        duration: entity.duration,
+                        maxPuffs: Int(entity.maxPuffs),
+                        puffsTaken: puffs
+                    )
                 }
+
                 promise(.success(phases))
             } catch {
-                print("Fetch phases error: \(error)")
+                print("Failed to fetch phases: \(error)")
                 promise(.success([]))
             }
         }
@@ -81,201 +92,149 @@ class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
     }
 }
 
+// MARK: - SessionLifetimeRepositoryCoreData
+
 class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
-    func loadSession() -> AnyPublisher<SessionLifetime, Never> {
+    func loadSession() -> AnyPublisher<SessionLifetimeModel, Never> {
         Future { promise in
-            let req: NSFetchRequest<SessionLifetimeEntity> = SessionLifetimeEntity.fetchRequest()
-            req.fetchLimit = 1
+            let request: NSFetchRequest<SessionLifetime> = SessionLifetime.fetchRequest()
+            request.fetchLimit = 1
+
             do {
-                if let e = try viewContext.fetch(req).first {
-                    let phaseReq: NSFetchRequest<PhaseEntity> = PhaseEntity.fetchRequest()
-                    phaseReq.sortDescriptors = [NSSortDescriptor(keyPath: \PhaseEntity.index, ascending: true)]
-                    let phaseEnts = try viewContext.fetch(phaseReq)
-                    let phases = phaseEnts.map { ent in
-                        Phase(id: ent.id ?? UUID(),
-                              index: Int(ent.index),
-                              duration: ent.duration,
-                              maxPuffs: Int(ent.maxPuffs))
-                    }
-                    let sess = SessionLifetime(
-                        sessionId: e.sessionId ?? UUID(),
-                        userId: e.userId ?? "",
-                        allPhases: phases,
-                        startedAt: e.startedAt ?? Date(),
-                        totalPuffsTaken: Int(e.totalPuffsTaken),
-                        phasesCompleted: Int(e.phasesCompleted)
-                    )
-                    promise(.success(sess))
-                } else {
-                    promise(.success(SessionLifetime(
-                        sessionId: UUID(),
-                        userId: "",
-                        allPhases: [],
-                        startedAt: Date(),
-                        totalPuffsTaken: 0,
-                        phasesCompleted: 0
-                    )))
+                guard let entity = try viewContext.fetch(request).first else {
+                    promise(.success(.init(userId: "", allPhases: [], startedAt: Date(), totalPuffsTaken: 0, phasesCompleted: 0)))
+                    return
                 }
+
+                let phaseEntities = (entity.phases?.array as? [Phase] ?? [])
+                let phases: [PhaseModel] = phaseEntities.map { phase in
+                    let puffs = (phase.puff?.array as? [Puff] ?? []).map { puff in
+                        PuffModel(
+                            puffNumber: Int(puff.puffNumber),
+                            timestamp: puff.timestamp ?? Date(),
+                            duration: puff.duration
+                        )
+                    }
+
+                    return PhaseModel(
+                        phaseIndex: Int(phase.index),
+                        duration: phase.duration,
+                        maxPuffs: Int(phase.maxPuffs),
+                        puffsTaken: puffs
+                    )
+                }
+
+                let model = SessionLifetimeModel(
+                    userId: entity.userId ?? "",
+                    allPhases: phases,
+                    startedAt: entity.startedAt ?? Date(),
+                    totalPuffsTaken: Int(entity.totalPuffsTaken),
+                    phasesCompleted: Int(entity.phasesCompleted)
+                )
+
+                promise(.success(model))
             } catch {
-                print("Load session error: \(error)")
-                promise(.success(SessionLifetime(
-                    sessionId: UUID(),
-                    userId: "",
-                    allPhases: [],
-                    startedAt: Date(),
-                    totalPuffsTaken: 0,
-                    phasesCompleted: 0
-                )))
+                print("Failed to load session: \(error)")
+                promise(.success(.init(userId: "", allPhases: [], startedAt: Date(), totalPuffsTaken: 0, phasesCompleted: 0)))
             }
         }
         .eraseToAnyPublisher()
     }
 }
 
-class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
-    private let subject = CurrentValueSubject<ActivePhase, Never>(ActivePhase(phaseIndex: 0,
-                                                                                  phaseStartDate: Date(),
-                                                                                  puffsTaken: 0))
+// MARK: - ActivePhaseRepositoryCoreData
 
-    init() { loadFromStore() }
+class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
+    private let subject = CurrentValueSubject<ActivePhaseModel, Never>(
+        ActivePhaseModel(phaseIndex: 0, phaseStartDate: Date())
+    )
+
+    init() {
+        loadFromStore()
+    }
 
     private func loadFromStore() {
-        let req: NSFetchRequest<ActivePhasesEntity> = ActivePhasesEntity.fetchRequest()
-        req.fetchLimit = 1
-        if let ent = try? viewContext.fetch(req).first {
-            let ap = ActivePhase(
-                phaseIndex: Int(ent.phaseIndex),
-                phaseStartDate: ent.phaseStartDate ?? Date(),
-                puffsTaken: Int(ent.puffsTaken)
+        let request: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
+        request.fetchLimit = 1
+        if let entity = try? viewContext.fetch(request).first {
+            let model = ActivePhaseModel(
+                phaseIndex: Int(entity.phaseIndex),
+                phaseStartDate: entity.phaseStartDate ?? Date()
             )
-            subject.send(ap)
+            subject.send(model)
         }
     }
 
-    func loadActivePhase() -> AnyPublisher<ActivePhase, Never> {
+    func loadActivePhase() -> AnyPublisher<ActivePhaseModel, Never> {
         subject.eraseToAnyPublisher()
     }
 
-    func saveActivePhase(_ active: ActivePhase) {
-        let req: NSFetchRequest<ActivePhasesEntity> = ActivePhasesEntity.fetchRequest()
-        req.fetchLimit = 1
-        let ent = (try? viewContext.fetch(req).first) ?? ActivePhasesEntity(context: viewContext)
-        ent.phaseIndex = Int16(active.phaseIndex)
-        ent.phaseStartDate = active.phaseStartDate
-        ent.puffsTaken = Int16(active.puffsTaken)
+    func saveActivePhase(_ active: ActivePhaseModel) {
+        let request: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
+        request.fetchLimit = 1
+        let entity = (try? viewContext.fetch(request).first) ?? ActivePhase(context: viewContext)
+
+        entity.phaseIndex = Int16(active.phaseIndex)
+        entity.phaseStartDate = active.phaseStartDate
+
         try? viewContext.save()
         subject.send(active)
     }
 }
 
-class PuffRepositoryCoreData: PuffRepositoryProtocol {
-    private let subject = CurrentValueSubject<[PuffEntry], Never>([])
+// MARK: - PuffRepositoryCoreData
 
-    init() { loadAll() }
+class PuffRepositoryCoreData: PuffRepositoryProtocol {
+    private let subject = CurrentValueSubject<[PuffModel], Never>([])
+
+    init() {
+        loadAll()
+    }
 
     private func loadAll() {
-        let req: NSFetchRequest<PuffEntryEntity> = PuffEntryEntity.fetchRequest()
-        req.sortDescriptors = [NSSortDescriptor(keyPath: \PuffEntryEntity.timestamp, ascending: true)]
-        if let ents = try? viewContext.fetch(req) {
-            let puffs = ents.map { ent in
-                PuffEntry(
-                    id: ent.id ?? UUID(),
-                    timestamp: ent.timestamp ?? Date(),
-                    duration: ent.duration,
-                    phaseIndex: Int(ent.phaseIndex)
+        let request: NSFetchRequest<Puff> = Puff.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Puff.timestamp, ascending: true)]
+
+        if let entities = try? viewContext.fetch(request) {
+            let puffs = entities.map { puff in
+                let phaseModel = PhaseModel(
+                    phaseIndex: Int(puff.phase?.index ?? 0),
+                    duration: puff.phase?.duration ?? 0,
+                    maxPuffs: Int(puff.phase?.maxPuffs ?? 0),
+                    puffsTaken: [] // Avoid recursion
+                )
+
+                return PuffModel(
+                    puffNumber: Int(puff.puffNumber),
+                    timestamp: puff.timestamp ?? Date(),
+                    duration: puff.duration
                 )
             }
             subject.send(puffs)
         }
     }
 
-    func loadPuffs() -> AnyPublisher<[PuffEntry], Never> {
+    func loadPuffs() -> AnyPublisher<[PuffModel], Never> {
         subject.eraseToAnyPublisher()
     }
 
-    func addPuff(_ puff: PuffEntry) {
-        let ent = PuffEntryEntity(context: viewContext)
-        ent.id = puff.id
-        ent.timestamp = puff.timestamp
-        ent.duration = puff.duration
-        ent.phaseIndex = Int16(puff.phaseIndex)
+    func addPuff(_ puff: PuffModel) {
+        let entity = Puff(context: viewContext)
+        entity.puffNumber = Int16(puff.puffNumber)
+        entity.timestamp = puff.timestamp
+        entity.duration = puff.duration
+
         try? viewContext.save()
+
         var current = subject.value
         current.append(puff)
         subject.send(current)
     }
-}
 
-// MARK: - ViewModel (Core Data-backed)
-
-class SessionViewModel: ObservableObject {
-    @Published var allPhases: [Phase] = []
-    @Published var session: SessionLifetime?
-    @Published var active: ActivePhase = ActivePhase(phaseIndex: 0, phaseStartDate: Date(), puffsTaken: 0)
-    @Published var puffs: [PuffEntry] = []
-    @Published var timeRemaining: TimeInterval = 0
-    
-    private var cancellables = Set<AnyCancellable>()
-    private var timerCancellable: AnyCancellable?
-    
-    private let phaseRepo: PhaseRepositoryProtocol
-    private let sessionRepo: SessionLifetimeRepositoryProtocol
-    private let activeRepo: ActivePhaseRepositoryProtocol
-    private let puffRepo: PuffRepositoryProtocol
-    
-    init(
-        phaseRepo: PhaseRepositoryProtocol = PhaseRepositoryCoreData(),
-        sessionRepo: SessionLifetimeRepositoryProtocol = SessionLifetimeRepositoryCoreData(),
-        activeRepo: ActivePhaseRepositoryProtocol = ActivePhaseRepositoryCoreData(),
-        puffRepo: PuffRepositoryProtocol = PuffRepositoryCoreData()
-    ) {
-        self.phaseRepo = phaseRepo
-        self.sessionRepo = sessionRepo
-        self.activeRepo = activeRepo
-        self.puffRepo = puffRepo
-        setupBindings()
-    }
-    
-    private func setupBindings() {
-        phaseRepo.fetchPhases()
-            .sink { [weak self] phases in
-                self?.allPhases = phases
-                self?.startTimer()
-            }
-            .store(in: &cancellables)
-        
-        sessionRepo.loadSession()
-            .sink { [weak self] sess in
-                self?.session = sess
-            }
-            .store(in: &cancellables)
-        
-        activeRepo.loadActivePhase()
-            .sink { [weak self] active in
-                self?.active = active
-                self?.updateTimeRemaining()
-            }
-            .store(in: &cancellables)
-        
-        puffRepo.loadPuffs()
-            .sink { [weak self] puffs in
-                self?.puffs = puffs
-            }
-            .store(in: &cancellables)
-    }
-    
-    private func startTimer() {
-        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.updateTimeRemaining()
-            }
-    }
-    
-    private func updateTimeRemaining() {
-        guard allPhases.indices.contains(active.phaseIndex) else { return }
-        let current = allPhases[active.phaseIndex]
-        let elapsed = Date().timeIntervalSince(active.phaseStartDate)
-        timeRemaining = max(0, current.duration - elapsed)
+    private func fetchPhase(by index: Int) -> Phase? {
+        let request: NSFetchRequest<Phase> = Phase.fetchRequest()
+        request.predicate = NSPredicate(format: "index == %d", index)
+        request.fetchLimit = 1
+        return try? viewContext.fetch(request).first
     }
 }
