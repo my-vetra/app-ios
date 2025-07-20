@@ -22,12 +22,12 @@ struct TrackerView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            MainView(trackerData: self.trackerData) // The main calorie/macros screen
-                .tabItem {
-                    Image(systemName: "flame.fill")
-                    Text("Track")
-                }
-                .tag(0)
+//            MainView(trackerData: self.trackerData) // The main calorie/macros screen
+//                .tabItem {
+//                    Image(systemName: "flame.fill")
+//                    Text("Track")
+//                }
+//                .tag(0)
 
             LeaderboardView() // Placeholder for future long-term progress
                 .tabItem {

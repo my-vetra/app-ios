@@ -1,16 +1,14 @@
 import SwiftUI
 import Combine
 import CoreData
-#if canImport(Charts)
-import Charts
-#endif
+
 
 // MARK: - Models (Pure Swift)
-
 struct PuffModel: Identifiable {
     let puffNumber: Int
     let timestamp: Date
     let duration: TimeInterval
+    let phaseIndex: Int
     var id: Int { puffNumber }
 }
 
@@ -18,7 +16,8 @@ struct PhaseModel: Identifiable {
     let phaseIndex: Int
     let duration: TimeInterval
     let maxPuffs: Int
-    var puffsTaken: [PuffModel]
+    var puffs: [PuffModel]
+    var puffsTaken: Int { puffs.count }
     var id: Int { phaseIndex }
 }
 
@@ -32,7 +31,7 @@ struct SessionLifetimeModel: Identifiable {
 }
 
 struct ActivePhaseModel {
-    let phaseIndex: Int
+    var phaseIndex: Int
     var phaseStartDate: Date
 }
 
@@ -53,7 +52,7 @@ protocol PuffRepositoryProtocol {
 
 
 // Shared Core Data context
-let viewContext = PersistenceController.shared.container.viewContext
+let viewContext = PersistenceController.preview.container.viewContext
 
 // MARK: - PhaseRepositoryCoreData
 
@@ -65,20 +64,21 @@ class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
 
             do {
                 let phaseEntities = try viewContext.fetch(request)
-                let phases: [PhaseModel] = phaseEntities.map { entity in
-                    let puffs = (entity.puff?.array as? [Puff] ?? []).map { puff in
+                let phases: [PhaseModel] = phaseEntities.map { phase in
+                    let puffs = (phase.puff?.array as? [Puff] ?? []).map { puff in
                         PuffModel(
                             puffNumber: Int(puff.puffNumber),
                             timestamp: puff.timestamp ?? Date(),
-                            duration: puff.duration
+                            duration: puff.duration,
+                            phaseIndex: Int(phase.index)
                         )
                     }
 
                     return PhaseModel(
-                        phaseIndex: Int(entity.index),
-                        duration: entity.duration,
-                        maxPuffs: Int(entity.maxPuffs),
-                        puffsTaken: puffs
+                        phaseIndex: Int(phase.index),
+                        duration: phase.duration,
+                        maxPuffs: Int(phase.maxPuffs),
+                        puffs: puffs
                     )
                 }
 
@@ -112,7 +112,8 @@ class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
                         PuffModel(
                             puffNumber: Int(puff.puffNumber),
                             timestamp: puff.timestamp ?? Date(),
-                            duration: puff.duration
+                            duration: puff.duration,
+                            phaseIndex: Int(phase.index)
                         )
                     }
 
@@ -120,7 +121,7 @@ class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
                         phaseIndex: Int(phase.index),
                         duration: phase.duration,
                         maxPuffs: Int(phase.maxPuffs),
-                        puffsTaken: puffs
+                        puffs: puffs
                     )
                 }
 
@@ -197,17 +198,11 @@ class PuffRepositoryCoreData: PuffRepositoryProtocol {
 
         if let entities = try? viewContext.fetch(request) {
             let puffs = entities.map { puff in
-                let phaseModel = PhaseModel(
-                    phaseIndex: Int(puff.phase?.index ?? 0),
-                    duration: puff.phase?.duration ?? 0,
-                    maxPuffs: Int(puff.phase?.maxPuffs ?? 0),
-                    puffsTaken: [] // Avoid recursion
-                )
-
                 return PuffModel(
                     puffNumber: Int(puff.puffNumber),
                     timestamp: puff.timestamp ?? Date(),
-                    duration: puff.duration
+                    duration: puff.duration,
+                    phaseIndex: Int(puff.phase?.index ?? 0)
                 )
             }
             subject.send(puffs)
@@ -223,6 +218,10 @@ class PuffRepositoryCoreData: PuffRepositoryProtocol {
         entity.puffNumber = Int16(puff.puffNumber)
         entity.timestamp = puff.timestamp
         entity.duration = puff.duration
+        
+        if let phaseEnt = fetchPhase(by: puff.phaseIndex) {
+            entity.phase = phaseEnt
+        }
 
         try? viewContext.save()
 

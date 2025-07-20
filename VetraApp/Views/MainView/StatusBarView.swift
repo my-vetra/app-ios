@@ -94,8 +94,8 @@ struct TimerArc: View {
         TimerArc(state: .unlocked, progress: 0.1, time: "1h")
                 .frame(width: 200, height: 200)
         HStack(spacing: 20) {
-            DeviceStatusBar(color: .mint, label: "Juice", progress: 0.75)
-            DeviceStatusBar(color: .mint, label: "Battery", progress: 0.5)
+            DeviceStatusBar(color: .gray, label: "Juice", progress: 0.75)
+//            DeviceStatusBar(color: .mint, label: "Battery", progress: 0.5)
         }
         .padding()
     }
