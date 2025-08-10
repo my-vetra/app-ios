@@ -87,36 +87,35 @@ final class SyncBridge: ObservableObject {
         guard !items.isEmpty else { return }
 
         var expected = lastSeen + 1
-        var advanced = false
+        var toInsert: [PuffModel] = []
 
         for p in items {
             switch p.puffNumber {
             case ..<expected:
-                // Head overlap or duplicate inside batch — ignore and keep scanning
+                // head overlap / duplicate — ignore
                 continue
 
             case expected:
-                // Exactly the next one we need
-                if !puffRepo.exists(puffNumber: p.puffNumber) {
-                    puffRepo.addPuff(p)
-                }
-                lastSeen = expected
+                // exactly next — accumulate (contiguous segment)
+                toInsert.append(p)
                 expected += 1
-                advanced = true
 
             default:
-                // True gap (> expected) — back off & retry from current lastSeen
+                // true gap (> expected) — backoff & retry from lastSeen
                 requestFromLastSeen(withBackoff: true)
                 return
             }
         }
 
-        // Reset backoff once we've made progress
-        if advanced { gapRetryCount = 0 }
+        if !toInsert.isEmpty {
+            // persist in one shot
+            puffRepo.addPuffs(toInsert)
+            lastSeen = toInsert.last!.puffNumber
+            gapRetryCount = 0
 
-        // Keep pulling while catching up
-        if isCatchingUp, advanced {
-            requestFromLastSeen(withBackoff: false)
+            if isCatchingUp {
+                requestFromLastSeen(withBackoff: false)
+            }
         }
     }
 
