@@ -1,23 +1,16 @@
-// ContentView.swift
 import SwiftUI
-import Combine
+import CoreData
 
 struct ContentView: View {
-    @StateObject private var bluetoothManager: BluetoothManager
-    @StateObject private var mainVM = MainViewModel()
-    @StateObject private var syncBridge: SyncBridge
+    @Environment(\.managedObjectContext) private var viewContext
 
-    init(bluetoothManager: BluetoothManager = BluetoothManager()) {
-        let bm = bluetoothManager
-        _bluetoothManager = StateObject(wrappedValue: bm)
-        _syncBridge = StateObject(wrappedValue: SyncBridge(bluetoothManager: bm))
-    }
+    @StateObject private var bluetoothManager = BluetoothManager()
 
     var body: some View {
         ZStack {
             if bluetoothManager.isConnected {
-                MainView()
-                    .environmentObject(mainVM)
+                // Pass the same context into MainView and SyncBridge
+                MainView(context: viewContext, bluetoothManager: bluetoothManager)
                     .transition(.slide)
             } else {
                 BluetoothView(bluetoothManager: bluetoothManager)
@@ -26,8 +19,4 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.5), value: bluetoothManager.isConnected)
     }
-}
-
-#Preview {
-    ContentView()
 }

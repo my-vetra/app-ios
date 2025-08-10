@@ -27,14 +27,10 @@ class MainViewModel: ObservableObject {
     private let activeRepo:  ActivePhaseRepositoryProtocol
     private let puffRepo:    PuffRepositoryProtocol
 
-    init(
-      sessionRepo: SessionLifetimeRepositoryProtocol = SessionLifetimeRepositoryCoreData(),
-      activeRepo:  ActivePhaseRepositoryProtocol = ActivePhaseRepositoryCoreData(),
-      puffRepo:    PuffRepositoryProtocol = PuffRepositoryCoreData()
-    ) {
-        self.sessionRepo = sessionRepo
-        self.activeRepo  = activeRepo
-        self.puffRepo    = puffRepo
+    init(context: NSManagedObjectContext) {
+        self.sessionRepo = SessionLifetimeRepositoryCoreData(context: context)
+        self.activeRepo  = ActivePhaseRepositoryCoreData(context: context)
+        self.puffRepo    = PuffRepositoryCoreData(context: context)
 
         bind()
         startTimer()

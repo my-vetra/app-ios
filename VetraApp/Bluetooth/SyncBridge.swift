@@ -1,6 +1,8 @@
 // SyncBridge.swift
 import Foundation
 import Combine
+import CoreData
+
 
 /// Bridges BLE events into Core Data repositories and manages delta requests.
 final class SyncBridge: ObservableObject {
@@ -12,18 +14,12 @@ final class SyncBridge: ObservableObject {
     private var lastSeen: Int = 0
     private var isCatchingUp = false
 
-    init(
-        bluetoothManager: BluetoothManager,
-        puffRepo: PuffRepositoryCoreData = PuffRepositoryCoreData(),
-        activeRepo: ActivePhaseRepositoryCoreData = ActivePhaseRepositoryCoreData()
-    ) {
+    init(bluetoothManager: BluetoothManager, context: NSManagedObjectContext) {
         self.bt = bluetoothManager
-        self.puffRepo = puffRepo
-        self.activeRepo = activeRepo
+        self.puffRepo = PuffRepositoryCoreData(context: context)
+        self.activeRepo = ActivePhaseRepositoryCoreData(context: context)
 
-        // initialize lastSeen from store
         self.lastSeen = puffRepo.maxPuffNumber()
-
         bind()
     }
 

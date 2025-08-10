@@ -50,13 +50,12 @@ protocol PuffRepositoryProtocol {
   func addPuff(_ puff: PuffModel)
 }
 
-
-// Shared Core Data context
-let viewContext = PersistenceController.preview.container.viewContext
-
 // MARK: - PhaseRepositoryCoreData
 
 class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) { self.context = context }
+    
     func fetchPhases() -> AnyPublisher<[PhaseModel], Never> {
         Future { promise in
             let request: NSFetchRequest<Phase> = Phase.fetchRequest()
@@ -95,6 +94,9 @@ class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
 // MARK: - SessionLifetimeRepositoryCoreData
 
 class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) { self.context = context }
+    
     func loadSession() -> AnyPublisher<SessionLifetimeModel, Never> {
         Future { promise in
             let request: NSFetchRequest<SessionLifetime> = SessionLifetime.fetchRequest()
@@ -146,6 +148,9 @@ class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
 // MARK: - ActivePhaseRepositoryCoreData
 
 class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) { self.context = context }
+    
     private let subject = CurrentValueSubject<ActivePhaseModel, Never>(
         ActivePhaseModel(phaseIndex: 0, phaseStartDate: Date())
     )
@@ -186,6 +191,9 @@ class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
 // MARK: - PuffRepositoryCoreData
 
 class PuffRepositoryCoreData: PuffRepositoryProtocol {
+    private let context: NSManagedObjectContext
+    init(context: NSManagedObjectContext) { self.context = context }
+    
     private let subject = CurrentValueSubject<[PuffModel], Never>([])
 
     init() {

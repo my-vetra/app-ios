@@ -1,6 +1,15 @@
 import SwiftUI
+import CoreData
 
 struct MainView: View {
+    @StateObject private var vm: MainViewModel
+    @StateObject private var bridge: SyncBridge
+
+    init(context: NSManagedObjectContext, bluetoothManager: BluetoothManager) {
+        _vm = StateObject(wrappedValue: MainViewModel(context: context))
+        _bridge = StateObject(wrappedValue: SyncBridge(bluetoothManager: bluetoothManager, context: context))
+    }
+
     @StateObject private var vm = MainViewModel()
     
         var color: Color {
@@ -60,14 +69,15 @@ struct MainView: View {
     }
 }
 
-
+#if DEBUG
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView()
-            .environment(\.managedObjectContext,
-                         PersistenceController.preview.container.viewContext)
+        let ctx = PersistenceController.preview.container.viewContext
+        MainView(context: ctx, bluetoothManager: BluetoothManager())
+            .environment(\.managedObjectContext, ctx)
     }
 }
+#endif
 
 
 //import SwiftUI
