@@ -52,17 +52,17 @@ protocol PuffRepositoryProtocol {
 
 // MARK: - PhaseRepositoryCoreData
 
-class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
+final class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) { self.context = context }
-    
+
     func fetchPhases() -> AnyPublisher<[PhaseModel], Never> {
         Future { promise in
             let request: NSFetchRequest<Phase> = Phase.fetchRequest()
             request.sortDescriptors = [NSSortDescriptor(keyPath: \Phase.index, ascending: true)]
 
             do {
-                let phaseEntities = try viewContext.fetch(request)
+                let phaseEntities = try self.context.fetch(request)
                 let phases: [PhaseModel] = phaseEntities.map { phase in
                     let puffs = (phase.puff?.array as? [Puff] ?? []).map { puff in
                         PuffModel(
@@ -72,7 +72,6 @@ class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
                             phaseIndex: Int(phase.index)
                         )
                     }
-
                     return PhaseModel(
                         phaseIndex: Int(phase.index),
                         duration: phase.duration,
@@ -80,7 +79,6 @@ class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
                         puffs: puffs
                     )
                 }
-
                 promise(.success(phases))
             } catch {
                 print("Failed to fetch phases: \(error)")
@@ -90,21 +88,21 @@ class PhaseRepositoryCoreData: PhaseRepositoryProtocol {
         .eraseToAnyPublisher()
     }
 }
-
 // MARK: - SessionLifetimeRepositoryCoreData
 
-class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
+final class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
     private let context: NSManagedObjectContext
     init(context: NSManagedObjectContext) { self.context = context }
-    
+
     func loadSession() -> AnyPublisher<SessionLifetimeModel, Never> {
         Future { promise in
             let request: NSFetchRequest<SessionLifetime> = SessionLifetime.fetchRequest()
             request.fetchLimit = 1
 
             do {
-                guard let entity = try viewContext.fetch(request).first else {
-                    promise(.success(.init(userId: "", allPhases: [], startedAt: Date(), totalPuffsTaken: 0, phasesCompleted: 0)))
+                guard let entity = try self.context.fetch(request).first else {
+                    promise(.success(.init(userId: "", allPhases: [], startedAt: Date(),
+                                           totalPuffsTaken: 0, phasesCompleted: 0)))
                     return
                 }
 
@@ -118,7 +116,6 @@ class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
                             phaseIndex: Int(phase.index)
                         )
                     }
-
                     return PhaseModel(
                         phaseIndex: Int(phase.index),
                         duration: phase.duration,
@@ -134,11 +131,11 @@ class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
                     totalPuffsTaken: Int(entity.totalPuffsTaken),
                     phasesCompleted: Int(entity.phasesCompleted)
                 )
-
                 promise(.success(model))
             } catch {
                 print("Failed to load session: \(error)")
-                promise(.success(.init(userId: "", allPhases: [], startedAt: Date(), totalPuffsTaken: 0, phasesCompleted: 0)))
+                promise(.success(.init(userId: "", allPhases: [], startedAt: Date(),
+                                       totalPuffsTaken: 0, phasesCompleted: 0)))
             }
         }
         .eraseToAnyPublisher()
@@ -147,27 +144,27 @@ class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol {
 
 // MARK: - ActivePhaseRepositoryCoreData
 
-class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
+final class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
     private let context: NSManagedObjectContext
-    init(context: NSManagedObjectContext) { self.context = context }
-    
     private let subject = CurrentValueSubject<ActivePhaseModel, Never>(
         ActivePhaseModel(phaseIndex: 0, phaseStartDate: Date())
     )
 
-    init() {
+    init(context: NSManagedObjectContext) {
+        self.context = context
         loadFromStore()
     }
 
     private func loadFromStore() {
         let request: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
         request.fetchLimit = 1
-        if let entity = try? viewContext.fetch(request).first {
-            let model = ActivePhaseModel(
-                phaseIndex: Int(entity.phaseIndex),
-                phaseStartDate: entity.phaseStartDate ?? Date()
+        if let entity = try? context.fetch(request).first {
+            subject.send(
+                ActivePhaseModel(
+                    phaseIndex: Int(entity.phaseIndex),
+                    phaseStartDate: entity.phaseStartDate ?? Date()
+                )
             )
-            subject.send(model)
         }
     }
 
@@ -178,25 +175,24 @@ class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
     func saveActivePhase(_ active: ActivePhaseModel) {
         let request: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
         request.fetchLimit = 1
-        let entity = (try? viewContext.fetch(request).first) ?? ActivePhase(context: viewContext)
+        let entity = (try? context.fetch(request).first) ?? ActivePhase(context: context)
 
         entity.phaseIndex = Int16(active.phaseIndex)
         entity.phaseStartDate = active.phaseStartDate
 
-        try? viewContext.save()
+        try? context.save()
         subject.send(active)
     }
 }
 
 // MARK: - PuffRepositoryCoreData
 
-class PuffRepositoryCoreData: PuffRepositoryProtocol {
+final class PuffRepositoryCoreData: PuffRepositoryProtocol {
     private let context: NSManagedObjectContext
-    init(context: NSManagedObjectContext) { self.context = context }
-    
     private let subject = CurrentValueSubject<[PuffModel], Never>([])
 
-    init() {
+    init(context: NSManagedObjectContext) {
+        self.context = context
         loadAll()
     }
 
@@ -204,9 +200,9 @@ class PuffRepositoryCoreData: PuffRepositoryProtocol {
         let request: NSFetchRequest<Puff> = Puff.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \Puff.timestamp, ascending: true)]
 
-        if let entities = try? viewContext.fetch(request) {
+        if let entities = try? context.fetch(request) {
             let puffs = entities.map { puff in
-                return PuffModel(
+                PuffModel(
                     puffNumber: Int(puff.puffNumber),
                     timestamp: puff.timestamp ?? Date(),
                     duration: puff.duration,
@@ -222,16 +218,16 @@ class PuffRepositoryCoreData: PuffRepositoryProtocol {
     }
 
     func addPuff(_ puff: PuffModel) {
-        let entity = Puff(context: viewContext)
+        let entity = Puff(context: context)
         entity.puffNumber = Int16(puff.puffNumber)
         entity.timestamp = puff.timestamp
         entity.duration = puff.duration
-        
+
         if let phaseEnt = fetchPhase(by: puff.phaseIndex) {
             entity.phase = phaseEnt
         }
 
-        try? viewContext.save()
+        try? context.save()
 
         var current = subject.value
         current.append(puff)
@@ -242,38 +238,35 @@ class PuffRepositoryCoreData: PuffRepositoryProtocol {
         let request: NSFetchRequest<Phase> = Phase.fetchRequest()
         request.predicate = NSPredicate(format: "index == %d", index)
         request.fetchLimit = 1
-        return try? viewContext.fetch(request).first
+        return try? context.fetch(request).first
     }
 }
 
+// MARK: - Helpers used by SyncBridge
 extension PuffRepositoryCoreData {
     func exists(puffNumber: Int) -> Bool {
         let request: NSFetchRequest<Puff> = Puff.fetchRequest()
         request.predicate = NSPredicate(format: "puffNumber == %d", puffNumber)
         request.fetchLimit = 1
-        let count = (try? viewContext.count(for: request)) ?? 0
-        return count > 0
+        return (try? context.fetch(request).isEmpty == false) ?? false
     }
-
+    
     func maxPuffNumber() -> Int {
-        let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: "Puff")
-        request.resultType = .dictionaryResultType
-        request.propertiesToFetch = [NSExpressionDescription.maxPuffNumber]
+        let request: NSFetchRequest<Puff> = Puff.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "puffNumber", ascending: false)]
         request.fetchLimit = 1
-        if let dict = try? viewContext.fetch(request).first,
-           let maxVal = dict["maxPuffNumber"] as? Int {
-            return maxVal
-        }
-        return 0
+        guard let top = try? context.fetch(request).first else { return 0 }
+        return Int(top.puffNumber)
     }
 }
 
-// Small helper to describe MAX() expression
+
 private extension NSExpressionDescription {
     static var maxPuffNumber: NSExpressionDescription {
         let ed = NSExpressionDescription()
         ed.name = "maxPuffNumber"
-        ed.expression = NSExpression(forFunction: "max:", arguments: [NSExpression(forKeyPath: "puffNumber")])
+        ed.expression = NSExpression(forFunction: "max:",
+                                     arguments: [NSExpression(forKeyPath: "puffNumber")])
         ed.expressionResultType = .integer32AttributeType
         return ed
     }

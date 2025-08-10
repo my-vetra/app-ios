@@ -187,7 +187,7 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         }
     }
 
-    private static func parsePuffsBatch(_ data: Data) -> [PuffModel]? {
+    static func parsePuffsBatch(_ data: Data) -> [PuffModel]? {
         var idx = 0
         guard data.count >= 1 else { return nil }
         let msgType = data.readU8(&idx)
@@ -227,7 +227,7 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         return items
     }
 
-    private static func parseActivePhase(_ data: Data) -> ActivePhaseModel? {
+    static func parseActivePhase(_ data: Data) -> ActivePhaseModel? {
         var idx = 0
         guard data.count >= 5 else { return nil }
         let phaseIndex = Int(data.readU8(&idx))

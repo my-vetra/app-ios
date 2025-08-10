@@ -6,7 +6,7 @@ import CoreData
 
 /// Bridges BLE events into Core Data repositories and manages delta requests.
 final class SyncBridge: ObservableObject {
-    private let bt: BluetoothManager
+    private let source: PuffsSource
     private let puffRepo: PuffRepositoryCoreData
     private let activeRepo: ActivePhaseRepositoryCoreData
 
@@ -15,25 +15,34 @@ final class SyncBridge: ObservableObject {
     private var isCatchingUp = false
 
     init(bluetoothManager: BluetoothManager, context: NSManagedObjectContext) {
-        self.bt = bluetoothManager
+        self.source = bluetoothManager
         self.puffRepo = PuffRepositoryCoreData(context: context)
         self.activeRepo = ActivePhaseRepositoryCoreData(context: context)
-
         self.lastSeen = puffRepo.maxPuffNumber()
         bind()
     }
 
+    // Test code path
+    init(source: PuffsSource, context: NSManagedObjectContext) {
+        self.source = source
+        self.puffRepo = PuffRepositoryCoreData(context: context)
+        self.activeRepo = ActivePhaseRepositoryCoreData(context: context)
+        self.lastSeen = puffRepo.maxPuffNumber()
+        bind()
+    }
+
+
     private func bind() {
         // Connection lifecycle → request deltas
-        bt.connectionPublisher
+        source.connectionPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] connected in
                 guard let self else { return }
                 if connected {
                     self.lastSeen = self.puffRepo.maxPuffNumber()
-                    self.bt.readActivePhase()
+                    self.source.readActivePhase()
                     self.isCatchingUp = true
-                    self.bt.requestPuffs(startAfter: UInt16(clamping: self.lastSeen), maxCount: 50)
+                    self.source.requestPuffs(startAfter: UInt16(clamping: self.lastSeen), maxCount: 50)
                 } else {
                     self.isCatchingUp = false
                 }
@@ -41,7 +50,7 @@ final class SyncBridge: ObservableObject {
             .store(in: &cancellables)
 
         // ActivePhase updates
-        bt.activePhasePublisher
+        source.activePhasePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] ap in
                 self?.activeRepo.saveActivePhase(ap)
@@ -49,7 +58,7 @@ final class SyncBridge: ObservableObject {
             .store(in: &cancellables)
 
         // Puffs stream
-        bt.puffsBatchPublisher
+        source.puffsBatchPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] batch in
                 guard let self else { return }
@@ -58,7 +67,7 @@ final class SyncBridge: ObservableObject {
             .store(in: &cancellables)
 
         // Backfill done (device should send as Indication)
-        bt.puffsBackfillComplete
+        source.puffsBackfillComplete
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.isCatchingUp = false
@@ -71,9 +80,9 @@ final class SyncBridge: ObservableObject {
 
         // Continuity check (simple, since device guarantees monotonically increasing puffNumber)
         let first = items[0].puffNumber
-        if lastSeen > 0 && first != lastSeen + 1 {
+        if first != lastSeen + 1 {
             // Gap detected → re-request from lastSeen again (idempotent)
-            bt.requestPuffs(startAfter: UInt16(clamping: lastSeen), maxCount: 50)
+            source.requestPuffs(startAfter: UInt16(clamping: lastSeen), maxCount: 50)
             return
         }
 
@@ -92,7 +101,18 @@ final class SyncBridge: ObservableObject {
 
         // If we're catching up, keep pulling until device signals done (or we can keep asking in chunks)
         if isCatchingUp, advanced {
-            bt.requestPuffs(startAfter: UInt16(clamping: lastSeen), maxCount: 50)
+            source.requestPuffs(startAfter: UInt16(clamping: lastSeen), maxCount: 50)
         }
     }
 }
+
+protocol PuffsSource {
+    var puffsBatchPublisher: PassthroughSubject<[PuffModel], Never> { get }
+    var puffsBackfillComplete: PassthroughSubject<Void, Never> { get }
+    var activePhasePublisher: PassthroughSubject<ActivePhaseModel, Never> { get }
+    var connectionPublisher: PassthroughSubject<Bool, Never> { get }
+    func requestPuffs(startAfter: UInt16, maxCount: UInt8?)
+    func readActivePhase()
+}
+
+extension BluetoothManager: PuffsSource {}

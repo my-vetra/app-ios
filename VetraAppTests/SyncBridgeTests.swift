@@ -1,0 +1,113 @@
+import XCTest
+import Combine
+import CoreData
+@testable import VetraApp
+
+final class SyncBridgeTests: XCTestCase {
+
+    // Minimal mock conforming to PuffsSource
+    final class MockSource: PuffsSource {
+        let puffsBatchPublisher = PassthroughSubject<[PuffModel], Never>()
+        let puffsBackfillComplete = PassthroughSubject<Void, Never>()
+        let activePhasePublisher = PassthroughSubject<ActivePhaseModel, Never>()
+        let connectionPublisher = PassthroughSubject<Bool, Never>()
+
+        var requests: [(UInt16, UInt8?)] = []
+        func requestPuffs(startAfter: UInt16, maxCount: UInt8?) {
+            requests.append((startAfter, maxCount))
+        }
+        func readActivePhase() { /* no-op */ }
+    }
+
+    func testInitialRequestUsesLastSeen() {
+        let ctx = TestCoreDataStack.makeContext()
+
+        // seed one puff so lastSeen == 7
+        let seed = Puff(context: ctx)
+        seed.puffNumber = 7
+        try? ctx.save()
+
+        let src = MockSource()
+        let bridge = SyncBridge(source: src, context: ctx)
+
+        // simulate connect
+        src.connectionPublisher.send(true)
+        waitForMainQueue()
+
+        // last call should be startAfter=7
+        XCTAssertEqual(src.requests.last?.0, 7)
+    }
+
+    func testGapTriggersRetryFromSameLastSeen() {
+        let ctx = TestCoreDataStack.makeContext()
+        let src = MockSource()
+        let bridge = SyncBridge(source: src, context: ctx)
+
+        src.connectionPublisher.send(true) // first request from 0
+        waitForMainQueue()
+        XCTAssertEqual(src.requests.last?.0, 0)
+
+        // Device sends a batch starting at #2 (gap from 0)
+        src.puffsBatchPublisher.send([PuffModel(puffNumber: 2, timestamp: Date(), duration: 1, phaseIndex: 1)])
+        waitForMainQueue()
+
+        // Bridge should re-request from lastSeen = 0 (no progress)
+        XCTAssertEqual(src.requests.last?.0, 0)
+    }
+
+    func testDedupAndAdvanceKeepsPulling() {
+        let ctx = TestCoreDataStack.makeContext()
+        let src = MockSource()
+        let bridge = SyncBridge(source: src, context: ctx)
+
+        src.connectionPublisher.send(true)    // startAfter=0
+        waitForMainQueue()
+        XCTAssertEqual(src.requests.last?.0, 0)
+
+        // Ingest 1,2 → should move lastSeen to 2 and immediately request from 2
+        src.puffsBatchPublisher.send([
+            PuffModel(puffNumber: 1, timestamp: Date(), duration: 1, phaseIndex: 1),
+            PuffModel(puffNumber: 2, timestamp: Date(), duration: 1, phaseIndex: 1)
+        ])
+        waitForMainQueue()
+        XCTAssertEqual(src.requests.last?.0, 2)
+
+        // Re-send 2 (duplicate) → should not advance lastSeen
+        src.puffsBatchPublisher.send([
+            PuffModel(puffNumber: 2, timestamp: Date(), duration: 1, phaseIndex: 1)
+        ])
+        waitForMainQueue()
+
+        // Last request still from 2
+        XCTAssertEqual(src.requests.last?.0, 2)
+    }
+
+    func testActivePhaseIsSaved() {
+        let ctx = TestCoreDataStack.makeContext()
+        let src = MockSource()
+        let bridge = SyncBridge(source: src, context: ctx)
+
+        let date = Date(timeIntervalSince1970: 12345)
+        src.activePhasePublisher.send(ActivePhaseModel(phaseIndex: 3, phaseStartDate: date))
+        waitForMainQueue()
+
+        // fetch from store
+        let req: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
+        req.fetchLimit = 1
+        let ap = try? ctx.fetch(req).first
+        XCTAssertNotNil(ap)
+        XCTAssertEqual(ap?.phaseIndex, 3)
+        XCTAssertEqual(ap?.phaseStartDate, date)
+    }
+}
+
+import XCTest
+
+extension XCTestCase {
+    /// Wait one turn of the main queue so Combine .receive(on: .main) can deliver.
+    func waitForMainQueue(_ timeout: TimeInterval = 0.2) {
+        let exp = expectation(description: "main-queue-drain")
+        DispatchQueue.main.async { exp.fulfill() }
+        wait(for: [exp], timeout: timeout)
+    }
+}

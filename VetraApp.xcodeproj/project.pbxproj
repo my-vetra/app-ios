@@ -22,9 +22,13 @@
 		9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6002DDAAD1E00211506 /* VetraApp.swift */; };
 		9D3CB6052DDAAD2100211506 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D3CB6042DDAAD2100211506 /* Assets.xcassets */; };
 		9D3CB6082DDAAD2100211506 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D3CB6072DDAAD2100211506 /* Preview Assets.xcassets */; };
-		9D3CB6192DDAAD2200211506 /* VetraAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6182DDAAD2200211506 /* VetraAppTests.swift */; };
 		9D3CB6232DDAAD2200211506 /* VetraAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */; };
 		9D3CB6252DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */; };
+		9D428BB42E485ACB008CE7D8 /* TestCoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BB32E485ACB008CE7D8 /* TestCoreDataStack.swift */; };
+		9D428BB72E485B01008CE7D8 /* BluetoothParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BB62E485B01008CE7D8 /* BluetoothParsingTests.swift */; };
+		9D428BBA2E485B37008CE7D8 /* SyncBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BB92E485B37008CE7D8 /* SyncBridgeTests.swift */; };
+		9D428BC02E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BBF2E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift */; };
+		9D428BC32E485C08008CE7D8 /* MainViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BC22E485C08008CE7D8 /* MainViewModelTests.swift */; };
 		9DD1882B2E4838690002E39F /* SyncBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DD1882A2E4838690002E39F /* SyncBridge.swift */; };
 		EF3F05512E1F6A84006BB0BB /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05502E1F6A79006BB0BB /* Model.swift */; };
 		EF3F05C32E1F7416006BB0BB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C22E1F740C006BB0BB /* Persistence.swift */; };
@@ -76,10 +80,14 @@
 		9D3CB60E2DDAAD2100211506 /* VetraApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VetraApp.entitlements; sourceTree = "<group>"; };
 		9D3CB60F2DDAAD2100211506 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9D3CB6142DDAAD2200211506 /* VetraAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VetraAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		9D3CB6182DDAAD2200211506 /* VetraAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppTests.swift; sourceTree = "<group>"; };
 		9D3CB61E2DDAAD2200211506 /* VetraAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VetraAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITests.swift; sourceTree = "<group>"; };
 		9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		9D428BB32E485ACB008CE7D8 /* TestCoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCoreDataStack.swift; sourceTree = "<group>"; };
+		9D428BB62E485B01008CE7D8 /* BluetoothParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothParsingTests.swift; sourceTree = "<group>"; };
+		9D428BB92E485B37008CE7D8 /* SyncBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBridgeTests.swift; sourceTree = "<group>"; };
+		9D428BBF2E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PuffRepositoryCoreDataTests.swift; sourceTree = "<group>"; };
+		9D428BC22E485C08008CE7D8 /* MainViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModelTests.swift; sourceTree = "<group>"; };
 		9DD1882A2E4838690002E39F /* SyncBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBridge.swift; sourceTree = "<group>"; };
 		EF3F05502E1F6A79006BB0BB /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		EF3F05C22E1F740C006BB0BB /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -250,7 +258,11 @@
 		9D3CB6172DDAAD2200211506 /* VetraAppTests */ = {
 			isa = PBXGroup;
 			children = (
-				9D3CB6182DDAAD2200211506 /* VetraAppTests.swift */,
+				9D428BB92E485B37008CE7D8 /* SyncBridgeTests.swift */,
+				9D428BC22E485C08008CE7D8 /* MainViewModelTests.swift */,
+				9D428BB62E485B01008CE7D8 /* BluetoothParsingTests.swift */,
+				9D428BBF2E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift */,
+				9D428BBD2E485B8C008CE7D8 /* Helpers */,
 			);
 			path = VetraAppTests;
 			sourceTree = "<group>";
@@ -262,6 +274,14 @@
 				9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */,
 			);
 			path = VetraAppUITests;
+			sourceTree = "<group>";
+		};
+		9D428BBD2E485B8C008CE7D8 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				9D428BB32E485ACB008CE7D8 /* TestCoreDataStack.swift */,
+			);
+			name = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -426,7 +446,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9D3CB6192DDAAD2200211506 /* VetraAppTests.swift in Sources */,
+				9D428BC02E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift in Sources */,
+				9D428BBA2E485B37008CE7D8 /* SyncBridgeTests.swift in Sources */,
+				9D428BC32E485C08008CE7D8 /* MainViewModelTests.swift in Sources */,
+				9D428BB42E485ACB008CE7D8 /* TestCoreDataStack.swift in Sources */,
+				9D428BB72E485B01008CE7D8 /* BluetoothParsingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

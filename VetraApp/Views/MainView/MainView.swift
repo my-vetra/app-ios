@@ -9,8 +9,6 @@ struct MainView: View {
         _vm = StateObject(wrappedValue: MainViewModel(context: context))
         _bridge = StateObject(wrappedValue: SyncBridge(bluetoothManager: bluetoothManager, context: context))
     }
-
-    @StateObject private var vm = MainViewModel()
     
         var color: Color {
             return vm.state == .unlocked ? .green : .mint

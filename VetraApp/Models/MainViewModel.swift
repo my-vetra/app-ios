@@ -1,6 +1,7 @@
 // MainViewModel.swift
 import SwiftUI
 import Combine
+import CoreData
 
 enum TimerState {
     case locked
