@@ -237,3 +237,36 @@ class PuffRepositoryCoreData: PuffRepositoryProtocol {
         return try? viewContext.fetch(request).first
     }
 }
+
+extension PuffRepositoryCoreData {
+    func exists(puffNumber: Int) -> Bool {
+        let request: NSFetchRequest<Puff> = Puff.fetchRequest()
+        request.predicate = NSPredicate(format: "puffNumber == %d", puffNumber)
+        request.fetchLimit = 1
+        let count = (try? viewContext.count(for: request)) ?? 0
+        return count > 0
+    }
+
+    func maxPuffNumber() -> Int {
+        let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: "Puff")
+        request.resultType = .dictionaryResultType
+        request.propertiesToFetch = [NSExpressionDescription.maxPuffNumber]
+        request.fetchLimit = 1
+        if let dict = try? viewContext.fetch(request).first,
+           let maxVal = dict["maxPuffNumber"] as? Int {
+            return maxVal
+        }
+        return 0
+    }
+}
+
+// Small helper to describe MAX() expression
+private extension NSExpressionDescription {
+    static var maxPuffNumber: NSExpressionDescription {
+        let ed = NSExpressionDescription()
+        ed.name = "maxPuffNumber"
+        ed.expression = NSExpression(forFunction: "max:", arguments: [NSExpression(forKeyPath: "puffNumber")])
+        ed.expressionResultType = .integer32AttributeType
+        return ed
+    }
+}

@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		9D0D4A102DDAC3AE00534A62 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A0E2DDAC3AE00534A62 /* BluetoothManager.swift */; };
-		9D0D4A112DDAC3AE00534A62 /* MockBluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A0F2DDAC3AE00534A62 /* MockBluetoothManager.swift */; };
-		9D0D4A142DDAC3F800534A62 /* TrackerDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A132DDAC3F800534A62 /* TrackerDataModel.swift */; };
 		9D0D4A5B2DDAC5DF00534A62 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A4F2DDAC5DF00534A62 /* SettingsView.swift */; };
 		9D0D4A5C2DDAC5DF00534A62 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A512DDAC5DF00534A62 /* Helpers.swift */; };
 		9D0D4A5D2DDAC5DF00534A62 /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D4A522DDAC5DF00534A62 /* StatusBarView.swift */; };
@@ -27,6 +25,7 @@
 		9D3CB6192DDAAD2200211506 /* VetraAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6182DDAAD2200211506 /* VetraAppTests.swift */; };
 		9D3CB6232DDAAD2200211506 /* VetraAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */; };
 		9D3CB6252DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */; };
+		9DD1882B2E4838690002E39F /* SyncBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DD1882A2E4838690002E39F /* SyncBridge.swift */; };
 		EF3F05512E1F6A84006BB0BB /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05502E1F6A79006BB0BB /* Model.swift */; };
 		EF3F05C32E1F7416006BB0BB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C22E1F740C006BB0BB /* Persistence.swift */; };
 		EF492D8B2E21C80700E6258E /* ActivePhase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */; };
@@ -59,8 +58,6 @@
 
 /* Begin PBXFileReference section */
 		9D0D4A0E2DDAC3AE00534A62 /* BluetoothManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
-		9D0D4A0F2DDAC3AE00534A62 /* MockBluetoothManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockBluetoothManager.swift; sourceTree = "<group>"; };
-		9D0D4A132DDAC3F800534A62 /* TrackerDataModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackerDataModel.swift; sourceTree = "<group>"; };
 		9D0D4A4F2DDAC5DF00534A62 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9D0D4A512DDAC5DF00534A62 /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		9D0D4A522DDAC5DF00534A62 /* StatusBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
@@ -83,6 +80,7 @@
 		9D3CB61E2DDAAD2200211506 /* VetraAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VetraAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D3CB6222DDAAD2200211506 /* VetraAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITests.swift; sourceTree = "<group>"; };
 		9D3CB6242DDAAD2200211506 /* VetraAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VetraAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		9DD1882A2E4838690002E39F /* SyncBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBridge.swift; sourceTree = "<group>"; };
 		EF3F05502E1F6A79006BB0BB /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		EF3F05C22E1F740C006BB0BB /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivePhase+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -125,7 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				9D0D4A0E2DDAC3AE00534A62 /* BluetoothManager.swift */,
-				9D0D4A0F2DDAC3AE00534A62 /* MockBluetoothManager.swift */,
+				9DD1882A2E4838690002E39F /* SyncBridge.swift */,
 			);
 			path = Bluetooth;
 			sourceTree = "<group>";
@@ -134,7 +132,6 @@
 			isa = PBXGroup;
 			children = (
 				EFBF07BD2E2C6EDC009E26DB /* MainViewModel.swift */,
-				9D0D4A132DDAC3F800534A62 /* TrackerDataModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -398,7 +395,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D0D4A5B2DDAC5DF00534A62 /* SettingsView.swift in Sources */,
-				9D0D4A142DDAC3F800534A62 /* TrackerDataModel.swift in Sources */,
 				9D0D4A632DDAC5DF00534A62 /* LeaderboardView.swift in Sources */,
 				9D0D4A102DDAC3AE00534A62 /* BluetoothManager.swift in Sources */,
 				9D0D4A5E2DDAC5DF00534A62 /* MainView.swift in Sources */,
@@ -406,6 +402,7 @@
 				9D18ACBF2DEEB53B005F38E5 /* QuitPlanningView.swift in Sources */,
 				9D0D4A5D2DDAC5DF00534A62 /* StatusBarView.swift in Sources */,
 				9D0D4A5C2DDAC5DF00534A62 /* Helpers.swift in Sources */,
+				9DD1882B2E4838690002E39F /* SyncBridge.swift in Sources */,
 				9D0D4A692DDAC60100534A62 /* VetraApp.xcdatamodeld in Sources */,
 				EF3F05512E1F6A84006BB0BB /* Model.swift in Sources */,
 				9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */,
@@ -419,7 +416,6 @@
 				EF492D912E21C80700E6258E /* SessionLifetime+CoreDataClass.swift in Sources */,
 				EF492D922E21C80700E6258E /* SessionLifetime+CoreDataProperties.swift in Sources */,
 				9D0D4A602DDAC5DF00534A62 /* BluetoothView.swift in Sources */,
-				9D0D4A112DDAC3AE00534A62 /* MockBluetoothManager.swift in Sources */,
 				9D0D4A622DDAC5DF00534A62 /* TrackerView.swift in Sources */,
 				9D0D4A5F2DDAC5DF00534A62 /* RippleEffectView.swift in Sources */,
 				9D0D4A612DDAC5DF00534A62 /* ContentView.swift in Sources */,
