@@ -1,55 +1,81 @@
+// BluetoothManager.swift
 import SwiftUI
 import CoreBluetooth
+import Combine
 
-class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @Published var isConnected = false
     @Published var peripheralName: String = "Vetra"
-    
-    // Timer data from the SYNC characteristic (in milliseconds)
-    @Published var persistentDuation: CGFloat = 0    // Field 1: Persistent Timer Total (ms)
-    @Published var persistentElapsed: CGFloat = 0    // Field 2: Persistent Timer Elapsed (ms)
-    @Published var coilDuration: CGFloat = 0           // Field 3: Coil Unlock Total Duration (ms)
-    @Published var coilRemaining: CGFloat = 0          // Field 4: Coil Unlock Remaining (ms)
-    
+
+    // BLE Core
     private var centralManager: CBCentralManager!
     private var peripheral: CBPeripheral?
-    
-    // Characteristics
+
+    // Service/Characteristics
+    private let serviceUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef0")
+
+    private let timerCharacteristicUUID       = CBUUID(string: "12345678-1234-5678-1234-56789abcdef1")
+    private let ntpCharacteristicUUID         = CBUUID(string: "12345678-1234-5678-1234-56789abcdef2")
+    private let keepAliveCharacteristicUUID   = CBUUID(string: "12345678-1234-5678-1234-56789abcdef4")
+
+    // NEW: south-side data model chars
+    private let puffsCharacteristicUUID       = CBUUID(string: "12345678-1234-5678-1234-56789abcdef5")
+    private let activePhaseCharacteristicUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef6")
+
     private var timerCharacteristic: CBCharacteristic?
-    private var syncCharacteristic: CBCharacteristic?
     private var ntpCharacteristic: CBCharacteristic?
     private var keepAliveCharacteristic: CBCharacteristic?
-    
-    // UUIDs from the ESP32 firmware
-    private let serviceUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef0")
-    private let timerCharacteristicUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef1")
-    private let ntpCharacteristicUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef2")
-    private let syncCharacteristicUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef3")
-    private let keepAliveCharacteristicUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef4")
-    
+    private var puffsCharacteristic: CBCharacteristic?
+    private var activePhaseCharacteristic: CBCharacteristic?
+
     private var keepAliveTimer: Timer?
-    
-    // Expose the native Bluetooth state
+
+    // Publishers to the bridge
+    let puffsBatchPublisher        = PassthroughSubject<[PuffModel], Never>()
+    let puffsBackfillComplete      = PassthroughSubject<Void, Never>()
+    let activePhasePublisher       = PassthroughSubject<ActivePhaseModel, Never>()
+    let connectionPublisher        = PassthroughSubject<Bool, Never>()
+
+    // Native Bluetooth state
     @Published var bluetoothState: CBManagerState = .unknown
-    
+
     override init() {
         super.init()
-        self.centralManager = CBCentralManager(delegate: self, queue: DispatchQueue.main)
+        self.centralManager = CBCentralManager(delegate: self, queue: .main)
     }
-    
-    
-    // MARK: - Bluetooth Scanning & Connection
-    
+
+    // MARK: - Public API used by SyncBridge
+
+    /// Ask device to send puffs strictly greater than `startAfter`. Optional cap with `maxCount`.
+    /// Request wire format (all LE):
+    /// [u8 msgType=0x10][u16 startAfter][u8 maxCount]
+    func requestPuffs(startAfter: UInt16, maxCount: UInt8? = nil) {
+        guard let peripheral, let puffsChar = puffsCharacteristic else { return }
+        var payload = Data()
+        payload.append(0x10) // request message
+        payload.append(contentsOf: Self.leBytes(of: startAfter))
+        payload.append(maxCount ?? 0) // 0 means "device default"
+        peripheral.writeValue(payload, for: puffsChar, type: .withResponse)
+    }
+
+    /// One-shot read of ActivePhase (for instant UI bootstrap).
+    func readActivePhase() {
+        guard let peripheral, let c = activePhaseCharacteristic else { return }
+        peripheral.readValue(for: c)
+    }
+
+    // MARK: - Central delegate
+
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
             bluetoothState = .poweredOn
             centralManager.scanForPeripherals(withServices: [serviceUUID], options: nil)
         } else {
             bluetoothState = .unknown
-            self.isConnected = false
+            isConnected = false
         }
     }
-    
+
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
                         advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
@@ -57,137 +83,188 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         centralManager.stopScan()
         centralManager.connect(peripheral, options: nil)
     }
-    
+
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         self.isConnected = true
+        self.connectionPublisher.send(true)
         peripheralName = peripheral.name ?? "Sylo"
         peripheral.discoverServices([serviceUUID])
-        self.startKeepAliveTimer()
+        startKeepAliveTimer()
     }
-    
+
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         DispatchQueue.main.async {
             self.isConnected = false
+            self.connectionPublisher.send(false)
             self.keepAliveTimer?.invalidate()
             self.keepAliveTimer = nil
             self.centralManager.scanForPeripherals(withServices: [self.serviceUUID], options: nil)
         }
     }
-    
-    // MARK: - Peripheral Delegate
-    
+
+    // MARK: - Peripheral delegate
+
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let services = peripheral.services else { return }
-        for service in services {
-            if service.uuid == serviceUUID {
-                peripheral.discoverCharacteristics([timerCharacteristicUUID,
-                                                    syncCharacteristicUUID,
-                                                    ntpCharacteristicUUID,
-                                                   keepAliveCharacteristicUUID], for: service)
-            }
-        }
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard let characteristics = service.characteristics else { return }
-        for characteristic in characteristics {
-            if characteristic.uuid == timerCharacteristicUUID {
-                timerCharacteristic = characteristic
-            } else if characteristic.uuid == syncCharacteristicUUID {
-                syncCharacteristic = characteristic
-                peripheral.setNotifyValue(true, for: characteristic) // Subscribe for changes
-            } else if characteristic.uuid == ntpCharacteristicUUID {
-                ntpCharacteristic = characteristic
-//                sendNTPTime()
-            } else if characteristic.uuid == keepAliveCharacteristicUUID {
-                keepAliveCharacteristic = characteristic
-//                sendNTPTime()
-            }
-        }
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        guard let data = characteristic.value else { return }
-        
-        if characteristic.uuid == syncCharacteristicUUID {
-            let parsed = parseSyncData(data)
-            persistentDuation = parsed.persistentDuation
-            persistentElapsed = parsed.persistentElapsed
-            coilDuration = parsed.coilDuration
-            coilRemaining = parsed.coilRemaining
-        } else if characteristic.uuid == ntpCharacteristicUUID {
-            if let response = String(data: data, encoding: .utf8) {
-                print("NTP update response: \(response)")
-            }
-        } else if characteristic.uuid == timerCharacteristicUUID {
-            if let response = String(data: data, encoding: .utf8) {
-                print("Timer update response: \(response)")
-            }
-        } else if characteristic.uuid == keepAliveCharacteristicUUID {
-            print("Acknowledged")
-        } else {
-            print("ERROR: Unknown characteristic")
+        for service in services where service.uuid == serviceUUID {
+            peripheral.discoverCharacteristics(
+                [
+                    timerCharacteristicUUID,
+                    ntpCharacteristicUUID,
+                    keepAliveCharacteristicUUID,
+                    puffsCharacteristicUUID,
+                    activePhaseCharacteristicUUID
+                ],
+                for: service
+            )
         }
     }
 
-    
-    // MARK: - Parsing ESP32 Sync Data
-    // Expected data format (16 bytes): four UInt32 values in little-endian order:
-    // Field 1: Persistent Timer Total (ms)
-    // Field 2: Persistent Timer Elapsed (ms)
-    // Field 3: Coil Unlock Total Duration (ms)
-    // Field 4: Coil Unlock Remaining (ms)
-    private func parseSyncData(_ data: Data) -> (persistentDuation: CGFloat, persistentElapsed: CGFloat, coilDuration: CGFloat, coilRemaining: CGFloat) {
-        guard data.count >= 16 else { return (0, 0, 0, 0) }
-        
-        let values: [UInt32] = data.withUnsafeBytes { pointer in
-            let buffer = pointer.bindMemory(to: UInt32.self)
-            return Array(buffer.prefix(4))
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let characteristics = service.characteristics else { return }
+
+        for c in characteristics {
+            switch c.uuid {
+            case timerCharacteristicUUID:       timerCharacteristic = c
+            case ntpCharacteristicUUID:         ntpCharacteristic = c
+            case keepAliveCharacteristicUUID:   keepAliveCharacteristic = c
+
+            case puffsCharacteristicUUID:
+                puffsCharacteristic = c
+                peripheral.setNotifyValue(true, for: c)
+
+            case activePhaseCharacteristicUUID:
+                activePhaseCharacteristic = c
+                peripheral.setNotifyValue(true, for: c)
+                // Optional immediate bootstrap
+                readActivePhase()
+
+            default: break
+            }
         }
-        
-        // Convert values from little-endian
-        let pDuration = CGFloat(UInt32(littleEndian: values[0]))
-        let pElapsed = CGFloat(UInt32(littleEndian: values[1]))
-        let cDuration = CGFloat(UInt32(littleEndian: values[2]))
-        let cRemaining = CGFloat(UInt32(littleEndian: values[3]))
-        
-        return (persistentDuation: pDuration, persistentElapsed: pElapsed, coilDuration: cDuration, coilRemaining: cRemaining)
     }
-    
-    // MARK: - Writing Timer Value
-    // Sends a new timer value to the ESP32 via the TIMER characteristic.
-    func writeTimerValue(_ value: UInt32) {
-        guard let timerChar = timerCharacteristic, let peripheral = peripheral else { return }
-        var timerValue = value.littleEndian
-        let data = Data(bytes: &timerValue, count: MemoryLayout<UInt32>.size)
-        peripheral.writeValue(data, for: timerChar, type: .withResponse)
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard error == nil, let data = characteristic.value else { return }
+
+        if characteristic.uuid == puffsCharacteristicUUID {
+            handlePuffsPayload(data)
+        } else if characteristic.uuid == activePhaseCharacteristicUUID {
+            if let ap = Self.parseActivePhase(data) {
+                activePhasePublisher.send(ap)
+            }
+        } else if characteristic.uuid == ntpCharacteristicUUID {
+            if let s = String(data: data, encoding: .utf8) { print("NTP response: \(s)") }
+        } else if characteristic.uuid == timerCharacteristicUUID {
+            if let s = String(data: data, encoding: .utf8) { print("Timer response: \(s)") }
+        } else if characteristic.uuid == keepAliveCharacteristicUUID {
+            print("KeepAlive ack")
+        }
     }
-    
-    // MARK: - NTP Time Update
-    // Sends the current system time (in ms) to the ESP32 via the NTP characteristic.
-    func sendNTPTime() {
-        guard let ntpChar = ntpCharacteristic, let peripheral = peripheral else { return }
-        let now = Date().timeIntervalSince1970  // current time in seconds
-        let now_ms = UInt32(now * 1000)         // convert to milliseconds (32-bit)
-        var value = now_ms.littleEndian
-        let data = Data(bytes: &value, count: MemoryLayout<UInt32>.size)
-        peripheral.writeValue(data, for: ntpChar, type: .withResponse)
-    }
-    
-    
-    
-    
+
+    // MARK: - KeepAlive
+
     private func startKeepAliveTimer() {
-        // Schedule timer to call keepAlive() every 30 seconds, for example
-        keepAliveTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { _ in
-            self.keepAlive()
+        keepAliveTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in
+            self?.keepAlive()
         }
     }
-    
-    // MARK: - Keep Alive Read
-    // Sends the current system time (in ms) to the ESP32 via the NTP characteristic.
+
     private func keepAlive() {
         guard let keepAliveChar = keepAliveCharacteristic, let peripheral = peripheral else { return }
         peripheral.readValue(for: keepAliveChar)
+    }
+
+    // MARK: - Parsing
+
+    /// Puffs frames:
+    /// Batch: [u8 type=0x01][u16 firstPuffNumber][u8 count] + count * Puff(9B)
+    /// Done:  [u8 type=0x02]
+    private func handlePuffsPayload(_ data: Data) {
+        guard let type = data.first else { return }
+        switch type {
+        case 0x01: // batch
+            if let batch = Self.parsePuffsBatch(data) {
+                puffsBatchPublisher.send(batch)
+            }
+        case 0x02: // done
+            puffsBackfillComplete.send(())
+        default:
+            print("Unknown puffs message type: \(type)")
+        }
+    }
+
+    private static func parsePuffsBatch(_ data: Data) -> [PuffModel]? {
+        var idx = 0
+        guard data.count >= 1 else { return nil }
+        let msgType = data.readU8(&idx)
+        guard msgType == 0x01 else { return nil }
+
+        let firstPuff = data.readLEU16(&idx)
+        let count     = data.readU8(&idx)
+
+        let stride = 9 // u16 puffNumber, u32 ts, u16 duration_ms, u8 phaseIndex
+        guard data.count == idx + Int(count) * stride else {
+            print("Puffs batch length mismatch")
+            return nil
+        }
+
+        var items: [PuffModel] = []
+        items.reserveCapacity(Int(count))
+
+        for _ in 0..<count {
+            let puffNumber  = Int(data.readLEU16(&idx))
+            let tsSeconds   = TimeInterval(data.readLEU32(&idx)) // device epoch (s)
+            let durationMs  = TimeInterval(data.readLEU16(&idx))
+            let phaseIndex  = Int(data.readU8(&idx))
+
+            let puff = PuffModel(
+                puffNumber: puffNumber,
+                timestamp: Date(timeIntervalSince1970: tsSeconds),
+                duration: durationMs / 1000.0,
+                phaseIndex: phaseIndex
+            )
+            items.append(puff)
+        }
+
+        // Optional sanity: verify continuity with header
+        if let first = items.first, first.puffNumber != Int(firstPuff) {
+            print("Header/payload puffNumber mismatch: \(firstPuff) vs \(first.puffNumber)")
+        }
+        return items
+    }
+
+    private static func parseActivePhase(_ data: Data) -> ActivePhaseModel? {
+        var idx = 0
+        guard data.count >= 5 else { return nil }
+        let phaseIndex = Int(data.readU8(&idx))
+        let startTs    = TimeInterval(data.readLEU32(&idx))
+        return ActivePhaseModel(phaseIndex: phaseIndex, phaseStartDate: Date(timeIntervalSince1970: startTs))
+    }
+
+    // MARK: - Utils
+
+    private static func leBytes(of v: UInt16) -> [UInt8] {
+        [UInt8(v & 0xff), UInt8((v >> 8) & 0xff)]
+    }
+}
+
+// MARK: - Data read helpers (LE)
+private extension Data {
+    func readU8(_ idx: inout Int) -> UInt8 {
+        defer { idx += 1 }; return self[idx]
+    }
+    func readLEU16(_ idx: inout Int) -> UInt16 {
+        let v = UInt16(self[idx]) | (UInt16(self[idx+1]) << 8)
+        idx += 2
+        return v
+    }
+    func readLEU32(_ idx: inout Int) -> UInt32 {
+        let b0 = UInt32(self[idx])
+        let b1 = UInt32(self[idx+1]) << 8
+        let b2 = UInt32(self[idx+2]) << 16
+        let b3 = UInt32(self[idx+3]) << 24
+        idx += 4
+        return b0 | b1 | b2 | b3
     }
 }
