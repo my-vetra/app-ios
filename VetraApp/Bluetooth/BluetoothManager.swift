@@ -1,4 +1,3 @@
-// BluetoothManager.swift
 import SwiftUI
 import CoreBluetooth
 import Combine
@@ -14,7 +13,6 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
     // Service/Characteristics
     private let serviceUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef0")
 
-    private let timerCharacteristicUUID       = CBUUID(string: "12345678-1234-5678-1234-56789abcdef1")
     private let ntpCharacteristicUUID         = CBUUID(string: "12345678-1234-5678-1234-56789abcdef2")
     private let keepAliveCharacteristicUUID   = CBUUID(string: "12345678-1234-5678-1234-56789abcdef4")
 
@@ -22,7 +20,6 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
     private let puffsCharacteristicUUID       = CBUUID(string: "12345678-1234-5678-1234-56789abcdef5")
     private let activePhaseCharacteristicUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef6")
 
-    private var timerCharacteristic: CBCharacteristic?
     private var ntpCharacteristic: CBCharacteristic?
     private var keepAliveCharacteristic: CBCharacteristic?
     private var puffsCharacteristic: CBCharacteristic?
@@ -109,7 +106,6 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         for service in services where service.uuid == serviceUUID {
             peripheral.discoverCharacteristics(
                 [
-                    timerCharacteristicUUID,
                     ntpCharacteristicUUID,
                     keepAliveCharacteristicUUID,
                     puffsCharacteristicUUID,
@@ -125,7 +121,6 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
 
         for c in characteristics {
             switch c.uuid {
-            case timerCharacteristicUUID:       timerCharacteristic = c
             case ntpCharacteristicUUID:         ntpCharacteristic = c
             case keepAliveCharacteristicUUID:   keepAliveCharacteristic = c
 
@@ -155,8 +150,6 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
             }
         } else if characteristic.uuid == ntpCharacteristicUUID {
             if let s = String(data: data, encoding: .utf8) { print("NTP response: \(s)") }
-        } else if characteristic.uuid == timerCharacteristicUUID {
-            if let s = String(data: data, encoding: .utf8) { print("Timer response: \(s)") }
         } else if characteristic.uuid == keepAliveCharacteristicUUID {
             print("KeepAlive ack")
         }
