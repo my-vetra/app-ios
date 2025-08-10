@@ -103,17 +103,17 @@ class MainViewModel: ObservableObject {
 
         let remain = max(duration - elapsed, 0)
         if remain <= 0 {
-            // 1) build a new ActivePhaseModel
-            var newActive = active
-            newActive.phaseIndex += 1
-            newActive.phaseStartDate = Date()
-
-            // 2) update BOTH your local property and the repo
-            self.active = newActive
-            activeRepo.saveActivePhase(newActive)
-
-            // 3) fully recompute all derived UI state
-            recompute()
+//            // 1) build a new ActivePhaseModel
+//            var newActive = active
+//            newActive.phaseIndex += 1
+//            newActive.phaseStartDate = Date()
+//
+//            // 2) update BOTH your local property and the repo
+//            self.active = newActive
+//            activeRepo.saveActivePhase(newActive)
+//
+//            // 3) fully recompute all derived UI state
+//            recompute()
             return
         }
 
