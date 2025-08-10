@@ -36,3 +36,35 @@ final class PuffRepositoryCoreDataTests: XCTestCase {
         XCTAssertEqual(saved?.phase?.index, 2)
     }
 }
+
+final class RepositoryAdditionalTests: XCTestCase {
+
+    func testAddManyPuffsPerformance() {
+        let ctx = TestCoreDataStack.makeContext()
+        let repo = PuffRepositoryCoreData(context: ctx)
+
+        measure {
+            for i in 1...5000 {
+                repo.addPuff(.init(puffNumber: i, timestamp: Date(), duration: 0.5, phaseIndex: 0))
+            }
+            XCTAssertEqual(repo.maxPuffNumber(), 5000)
+        }
+    }
+
+    func testAddPuffsFastNoCrash() {
+        let ctx = TestCoreDataStack.makeContext()
+        let repo = PuffRepositoryCoreData(context: ctx)
+
+        let group = DispatchGroup()
+        // Same-queue Core Data: dispatch async but still on main
+        for i in 1...200 {
+            group.enter()
+            DispatchQueue.main.async {
+                repo.addPuff(.init(puffNumber: i, timestamp: Date(), duration: 0.1, phaseIndex: 1))
+                group.leave()
+            }
+        }
+        group.wait()
+        XCTAssertEqual(repo.maxPuffNumber(), 200)
+    }
+}

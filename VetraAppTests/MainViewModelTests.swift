@@ -45,4 +45,61 @@ final class MainViewModelTests: XCTestCase {
         XCTAssertLessThan(vm.progress, 1.0)
         XCTAssertFalse(vm.timeRemainingString.isEmpty)
     }
+
+    func testMaxPuffsZeroTreatAsLocked() {
+        let ctx = TestCoreDataStack.makeContext()
+
+        let session = SessionLifetime(context: ctx)
+        session.userId = "u"
+        let phase = Phase(context: ctx)
+        phase.index = 0
+        phase.maxPuffs = 0
+        phase.duration = 60
+        session.addToPhases(phase)
+
+        let active = ActivePhase(context: ctx)
+        active.phaseIndex = 0
+        active.phaseStartDate = Date().addingTimeInterval(-5)
+
+        try? ctx.save()
+
+        let vm = MainViewModel(context: ctx)
+        // Let Combine deliver
+        let exp = expectation(description: "bind")
+        DispatchQueue.main.async { exp.fulfill() }
+        wait(for: [exp], timeout: 0.3)
+
+        // Division by zero should not explode; treat as locked with 0/0
+        XCTAssertEqual(vm.ratioString, "0/0")
+    }
+
+    func testPhaseChangeRecomputes() {
+        let ctx = TestCoreDataStack.makeContext()
+        let session = SessionLifetime(context: ctx)
+        session.userId = "u"
+        let p0 = Phase(context: ctx); p0.index = 0; p0.duration = 60; p0.maxPuffs = 3
+        let p1 = Phase(context: ctx); p1.index = 1; p1.duration = 120; p1.maxPuffs = 2
+        session.addToPhases(p0); session.addToPhases(p1)
+
+        let active = ActivePhase(context: ctx)
+        active.phaseIndex = 0
+        active.phaseStartDate = Date()
+
+        try? ctx.save()
+
+        let vm = MainViewModel(context: ctx)
+        let exp1 = expectation(description: "bind1")
+        DispatchQueue.main.async { exp1.fulfill() }
+        wait(for: [exp1], timeout: 0.3)
+        XCTAssertEqual(vm.currentPhaseIndex, 0)
+
+        // Move to phase 1 via repo
+        let repo = ActivePhaseRepositoryCoreData(context: ctx)
+        repo.saveActivePhase(.init(phaseIndex: 1, phaseStartDate: Date()))
+
+        let exp2 = expectation(description: "bind2")
+        DispatchQueue.main.async { exp2.fulfill() }
+        wait(for: [exp2], timeout: 0.3)
+        XCTAssertEqual(vm.currentPhaseIndex, 1)
+    }
 }

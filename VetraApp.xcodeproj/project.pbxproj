@@ -29,6 +29,9 @@
 		9D428BBA2E485B37008CE7D8 /* SyncBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BB92E485B37008CE7D8 /* SyncBridgeTests.swift */; };
 		9D428BC02E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BBF2E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift */; };
 		9D428BC32E485C08008CE7D8 /* MainViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BC22E485C08008CE7D8 /* MainViewModelTests.swift */; };
+		9D428BC62E486800008CE7D8 /* BluetoothParsingFuzzTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BC52E486800008CE7D8 /* BluetoothParsingFuzzTests.swift */; };
+		9D428BC92E486830008CE7D8 /* SyncBridgeEdgeCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BC82E486830008CE7D8 /* SyncBridgeEdgeCaseTests.swift */; };
+		9D428BCB2E486CB7008CE7D8 /* Repositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D428BCA2E486CB7008CE7D8 /* Repositories.swift */; };
 		9DD1882B2E4838690002E39F /* SyncBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DD1882A2E4838690002E39F /* SyncBridge.swift */; };
 		EF3F05512E1F6A84006BB0BB /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05502E1F6A79006BB0BB /* Model.swift */; };
 		EF3F05C32E1F7416006BB0BB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C22E1F740C006BB0BB /* Persistence.swift */; };
@@ -88,6 +91,9 @@
 		9D428BB92E485B37008CE7D8 /* SyncBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBridgeTests.swift; sourceTree = "<group>"; };
 		9D428BBF2E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PuffRepositoryCoreDataTests.swift; sourceTree = "<group>"; };
 		9D428BC22E485C08008CE7D8 /* MainViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModelTests.swift; sourceTree = "<group>"; };
+		9D428BC52E486800008CE7D8 /* BluetoothParsingFuzzTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothParsingFuzzTests.swift; sourceTree = "<group>"; };
+		9D428BC82E486830008CE7D8 /* SyncBridgeEdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBridgeEdgeCaseTests.swift; sourceTree = "<group>"; };
+		9D428BCA2E486CB7008CE7D8 /* Repositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repositories.swift; sourceTree = "<group>"; };
 		9DD1882A2E4838690002E39F /* SyncBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBridge.swift; sourceTree = "<group>"; };
 		EF3F05502E1F6A79006BB0BB /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		EF3F05C22E1F740C006BB0BB /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -199,6 +205,7 @@
 				EF3F05C22E1F740C006BB0BB /* Persistence.swift */,
 				EF3F05502E1F6A79006BB0BB /* Model.swift */,
 				9D0D4A662DDAC60100534A62 /* VetraApp.xcdatamodeld */,
+				9D428BCA2E486CB7008CE7D8 /* Repositories.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -258,9 +265,9 @@
 		9D3CB6172DDAAD2200211506 /* VetraAppTests */ = {
 			isa = PBXGroup;
 			children = (
-				9D428BB92E485B37008CE7D8 /* SyncBridgeTests.swift */,
+				9D428BC72E48681D008CE7D8 /* Sync */,
+				9D428BC42E4867E0008CE7D8 /* Parsing */,
 				9D428BC22E485C08008CE7D8 /* MainViewModelTests.swift */,
-				9D428BB62E485B01008CE7D8 /* BluetoothParsingTests.swift */,
 				9D428BBF2E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift */,
 				9D428BBD2E485B8C008CE7D8 /* Helpers */,
 			);
@@ -282,6 +289,24 @@
 				9D428BB32E485ACB008CE7D8 /* TestCoreDataStack.swift */,
 			);
 			name = Helpers;
+			sourceTree = "<group>";
+		};
+		9D428BC42E4867E0008CE7D8 /* Parsing */ = {
+			isa = PBXGroup;
+			children = (
+				9D428BB62E485B01008CE7D8 /* BluetoothParsingTests.swift */,
+				9D428BC52E486800008CE7D8 /* BluetoothParsingFuzzTests.swift */,
+			);
+			name = Parsing;
+			sourceTree = "<group>";
+		};
+		9D428BC72E48681D008CE7D8 /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				9D428BB92E485B37008CE7D8 /* SyncBridgeTests.swift */,
+				9D428BC82E486830008CE7D8 /* SyncBridgeEdgeCaseTests.swift */,
+			);
+			name = Sync;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -437,6 +462,7 @@
 				EF492D922E21C80700E6258E /* SessionLifetime+CoreDataProperties.swift in Sources */,
 				9D0D4A602DDAC5DF00534A62 /* BluetoothView.swift in Sources */,
 				9D0D4A622DDAC5DF00534A62 /* TrackerView.swift in Sources */,
+				9D428BCB2E486CB7008CE7D8 /* Repositories.swift in Sources */,
 				9D0D4A5F2DDAC5DF00534A62 /* RippleEffectView.swift in Sources */,
 				9D0D4A612DDAC5DF00534A62 /* ContentView.swift in Sources */,
 			);
@@ -446,9 +472,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D428BC62E486800008CE7D8 /* BluetoothParsingFuzzTests.swift in Sources */,
 				9D428BC02E485BE4008CE7D8 /* PuffRepositoryCoreDataTests.swift in Sources */,
 				9D428BBA2E485B37008CE7D8 /* SyncBridgeTests.swift in Sources */,
 				9D428BC32E485C08008CE7D8 /* MainViewModelTests.swift in Sources */,
+				9D428BC92E486830008CE7D8 /* SyncBridgeEdgeCaseTests.swift in Sources */,
 				9D428BB42E485ACB008CE7D8 /* TestCoreDataStack.swift in Sources */,
 				9D428BB72E485B01008CE7D8 /* BluetoothParsingTests.swift in Sources */,
 			);
