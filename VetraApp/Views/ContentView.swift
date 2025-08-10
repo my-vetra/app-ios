@@ -1,22 +1,25 @@
+// ContentView.swift
 import SwiftUI
+import Combine
 
 struct ContentView: View {
     @StateObject private var bluetoothManager: BluetoothManager
-    @StateObject private var trackerData: TrackerDataModel
+    @StateObject private var mainVM = MainViewModel()
+    @StateObject private var syncBridge: SyncBridge
 
     init(bluetoothManager: BluetoothManager = BluetoothManager()) {
-        _bluetoothManager = StateObject(wrappedValue: bluetoothManager)
-        _trackerData = StateObject(wrappedValue: TrackerDataModel(bluetoothManager: bluetoothManager))
+        let bm = bluetoothManager
+        _bluetoothManager = StateObject(wrappedValue: bm)
+        _syncBridge = StateObject(wrappedValue: SyncBridge(bluetoothManager: bm))
     }
 
     var body: some View {
         ZStack {
             if bluetoothManager.isConnected {
-                // When connected, transition to TrackerView
-                TrackerView(trackerData: trackerData)
+                MainView()
+                    .environmentObject(mainVM)
                     .transition(.slide)
             } else {
-                // Otherwise, show the Bluetooth view
                 BluetoothView(bluetoothManager: bluetoothManager)
                     .transition(.slide)
             }
