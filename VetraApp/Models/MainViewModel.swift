@@ -1,42 +1,40 @@
+// MainViewModel.swift
 import SwiftUI
 import Combine
 
 class MainViewModel: ObservableObject {
-    // 🔗 Driven by session + active
     @Published var state: TimerState = .locked
-    @Published var progress: Double    = 0     // puffsTaken/maxPuffs
-    @Published var ratioString: String = "0/0" // e.g. "3/5"
-    @Published var timeProgress: Double    = 0     // elapsed/duration
+    @Published var progress: Double    = 0
+    @Published var ratioString: String = "0/0"
+    @Published var timeProgress: Double    = 0
     @Published var timeRemainingString: String = "--"
     @Published var username: String = ""
     @Published var currentPhaseIndex: Int = 0
-    
-    
-    // 🔗 Underlying models
+
     private var session: SessionLifetimeModel?
     private var active: ActivePhaseModel?
-    
-    
-    
+    private var puffs: [PuffModel] = []
+
     private var cancellables = Set<AnyCancellable>()
-    
-    // 🔗 inject repos
+
     private let sessionRepo: SessionLifetimeRepositoryProtocol
     private let activeRepo:  ActivePhaseRepositoryProtocol
-    
+    private let puffRepo:    PuffRepositoryProtocol
+
     init(
       sessionRepo: SessionLifetimeRepositoryProtocol = SessionLifetimeRepositoryCoreData(),
-      activeRepo:  ActivePhaseRepositoryProtocol = ActivePhaseRepositoryCoreData()
+      activeRepo:  ActivePhaseRepositoryProtocol = ActivePhaseRepositoryCoreData(),
+      puffRepo:    PuffRepositoryProtocol = PuffRepositoryCoreData()
     ) {
         self.sessionRepo = sessionRepo
         self.activeRepo  = activeRepo
-        
+        self.puffRepo    = puffRepo
+
         bind()
         startTimer()
     }
-    
+
     private func bind() {
-        // 🔗 listen for session load
         sessionRepo.loadSession()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sess in
@@ -44,8 +42,7 @@ class MainViewModel: ObservableObject {
                 self?.recompute()
             }
             .store(in: &cancellables)
-        
-        // 🔗 listen for active phase
+
         activeRepo.loadActivePhase()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] active in
@@ -53,57 +50,61 @@ class MainViewModel: ObservableObject {
                 self?.recompute()
             }
             .store(in: &cancellables)
+
+        // NEW: live puffs stream → keeps ratio/progress fresh
+        puffRepo.loadPuffs()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] items in
+                self?.puffs = items
+                self?.recompute()
+            }
+            .store(in: &cancellables)
     }
-    
+
     private func startTimer() {
-        // 🔗 refresh timing every second
         Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in self?.recomputeTime() }
             .store(in: &cancellables)
     }
-    
+
     private func recompute() {
         guard
           let session = session,
           let active  = active,
           session.allPhases.indices.contains(active.phaseIndex)
         else { return }
-        
+
         let phase = session.allPhases[active.phaseIndex]
-        let taken = phase.puffsTaken                   // 🔗 puffsTaken
-        let maxP   = phase.maxPuffs
-        
-        // locked if we've hit the max
-        state = (taken == maxP) ? .locked : .unlocked
+        // Count puffs that belong to the current phase (puffs carry phaseIndex)
+        let taken = puffs.lazy.filter { $0.phaseIndex == active.phaseIndex }.count
+        let maxP  = phase.maxPuffs
+
+        state = (taken >= maxP) ? .locked : .unlocked
         username = session.userId
         currentPhaseIndex = active.phaseIndex
-        // puff‐ratio
-        progress      = Double(taken) / Double(maxP)
-        ratioString   = "\(taken)/\(maxP)"
+
+        progress    = Double(min(taken, maxP)) / Double(maxP)
+        ratioString = "\(min(taken, maxP))/\(maxP)"
         recomputeTime()
     }
-    
+
     private func recomputeTime() {
-        guard
-          let session = session,
-          let storedActive = active,
-          session.allPhases.indices.contains(storedActive.phaseIndex)
+        guard let session = session,
+              let active  = active,
+              session.allPhases.indices.contains(active.phaseIndex)
         else { return }
 
-        let phase    = session.allPhases[storedActive.phaseIndex]
-        let elapsed  = Date().timeIntervalSince(storedActive.phaseStartDate)
+        let phase    = session.allPhases[active.phaseIndex]
+        let elapsed  = Date().timeIntervalSince(active.phaseStartDate)
         let duration = phase.duration
 
-        // time-bar progress
         timeProgress = min(max(elapsed / duration, 0), 1)
 
-        let remain = duration - elapsed
-
-        // 🔄 phase rollover
+        let remain = max(duration - elapsed, 0)
         if remain <= 0 {
             // 1) build a new ActivePhaseModel
-            var newActive = storedActive
+            var newActive = active
             newActive.phaseIndex += 1
             newActive.phaseStartDate = Date()
 
@@ -116,7 +117,6 @@ class MainViewModel: ObservableObject {
             return
         }
 
-        // only set this when we're still in the same phase
         timeRemainingString = Self.formatTime(remain)
     }
 
