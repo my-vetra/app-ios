@@ -86,28 +86,17 @@ final class SyncBridge: ObservableObject {
     private func handlePuffs(_ items: [PuffModel]) {
         guard !items.isEmpty else { return }
 
-        // 1) Front-door continuity: first must be exactly lastSeen+1
-        let first = items[0].puffNumber
-        if first != lastSeen + 1 {
-            requestFromLastSeen(withBackoff: true)
-            return
-        }
-
-        // Reset backoff as we're in lockstep now
-        gapRetryCount = 0
-
-        // 2) Walk the batch strictly in sequence using an `expected` pointer
         var expected = lastSeen + 1
         var advanced = false
 
         for p in items {
             switch p.puffNumber {
             case ..<expected:
-                // duplicate/overlap inside batch — ignore
+                // Head overlap or duplicate inside batch — ignore and keep scanning
                 continue
 
             case expected:
-                // strictly next in sequence — persist
+                // Exactly the next one we need
                 if !puffRepo.exists(puffNumber: p.puffNumber) {
                     puffRepo.addPuff(p)
                 }
@@ -116,13 +105,16 @@ final class SyncBridge: ObservableObject {
                 advanced = true
 
             default:
-                // 3) Mid-batch gap — stop ingesting and re-request from current lastSeen (with backoff)
+                // True gap (> expected) — back off & retry from current lastSeen
                 requestFromLastSeen(withBackoff: true)
                 return
             }
         }
 
-        // 4) If we advanced and are still catching up, immediately ask for the next chunk
+        // Reset backoff once we've made progress
+        if advanced { gapRetryCount = 0 }
+
+        // Keep pulling while catching up
         if isCatchingUp, advanced {
             requestFromLastSeen(withBackoff: false)
         }

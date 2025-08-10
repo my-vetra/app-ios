@@ -144,46 +144,92 @@ final class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol
 
 // MARK: - ActivePhaseRepositoryCoreData
 
+import CoreData
+import Combine
+
 final class ActivePhaseRepositoryCoreData: ActivePhaseRepositoryProtocol {
     private let context: NSManagedObjectContext
     private let subject = CurrentValueSubject<ActivePhaseModel, Never>(
         ActivePhaseModel(phaseIndex: 0, phaseStartDate: Date())
     )
+    private var saveObserver: AnyCancellable?
 
     init(context: NSManagedObjectContext) {
         self.context = context
-        loadFromStore()
+        // Initial load
+        loadFromStoreAndPublish()
+
+        // Observe ANY save on this context and republish if ActivePhase changed
+        saveObserver = NotificationCenter.default
+            .publisher(for: .NSManagedObjectContextDidSave, object: nil)
+            .compactMap { $0.object as? NSManagedObjectContext }
+            .filter { [weak self] ctx in
+                guard let self = self else { return false }
+                return ctx.persistentStoreCoordinator === self.context.persistentStoreCoordinator
+            }
+            .sink { [weak self] noteCtx in
+                guard let self else { return }
+                self.loadFromStoreAndPublish() // touches check can be skipped now; it's cheap to reload 1 row
+            }
     }
 
-    private func loadFromStore() {
-        let request: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
-        request.fetchLimit = 1
-        if let entity = try? context.fetch(request).first {
-            subject.send(
-                ActivePhaseModel(
-                    phaseIndex: Int(entity.phaseIndex),
-                    phaseStartDate: entity.phaseStartDate ?? Date()
-                )
-            )
-        }
-    }
+    deinit { saveObserver?.cancel() }
 
     func loadActivePhase() -> AnyPublisher<ActivePhaseModel, Never> {
         subject.eraseToAnyPublisher()
     }
 
+
     func saveActivePhase(_ active: ActivePhaseModel) {
-        let request: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
-        request.fetchLimit = 1
-        let entity = (try? context.fetch(request).first) ?? ActivePhase(context: context)
+        context.performAndWait {
+            let req: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
+            req.fetchLimit = 1
+            let entity = (try? context.fetch(req).first) ?? ActivePhase(context: context)
 
-        entity.phaseIndex = Int16(active.phaseIndex)
-        entity.phaseStartDate = active.phaseStartDate
+            entity.phaseIndex = Int16(active.phaseIndex)
+            entity.phaseStartDate = active.phaseStartDate
 
-        try? context.save()
-        subject.send(active)
+            try? context.save()
+
+            // Immediate publish for anyone subscribed to THIS repo instance
+            let model = ActivePhaseModel(
+                phaseIndex: Int(entity.phaseIndex),
+                phaseStartDate: entity.phaseStartDate ?? Date()
+            )
+            subject.send(model)
+        }
+    }
+
+    // MARK: - Internals
+
+    private func loadFromStoreAndPublish() {
+        context.perform {
+            let request: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
+            request.fetchLimit = 1
+            let model: ActivePhaseModel
+            if let entity = try? self.context.fetch(request).first {
+                model = ActivePhaseModel(
+                    phaseIndex: Int(entity.phaseIndex),
+                    phaseStartDate: entity.phaseStartDate ?? Date()
+                )
+            } else {
+                model = ActivePhaseModel(phaseIndex: 0, phaseStartDate: Date())
+            }
+            DispatchQueue.main.async { self.subject.send(model) }
+        }
+    }
+
+    private func noteTouchesActivePhase(_ note: Notification) -> Bool {
+        func containsActivePhase(_ key: String) -> Bool {
+            guard let set = note.userInfo?[key] as? Set<NSManagedObject> else { return false }
+            return set.contains { $0 is ActivePhase }
+        }
+        return containsActivePhase(NSInsertedObjectsKey)
+            || containsActivePhase(NSUpdatedObjectsKey)
+            || containsActivePhase(NSDeletedObjectsKey)
     }
 }
+
 
 // MARK: - PuffRepositoryCoreData
 
@@ -257,6 +303,22 @@ extension PuffRepositoryCoreData {
         request.fetchLimit = 1
         guard let top = try? context.fetch(request).first else { return 0 }
         return Int(top.puffNumber)
+    }
+    
+    func addPuffs(_ puffs: [PuffModel]) {
+        context.perform {
+            for p in puffs {
+                let e = Puff(context: self.context)
+                e.puffNumber = Int16(p.puffNumber)
+                e.timestamp  = p.timestamp
+                e.duration   = p.duration
+                if let phaseEnt = self.fetchPhase(by: p.phaseIndex) {
+                    e.phase = phaseEnt
+                }
+            }
+            try? self.context.save()
+            // Observer will call reloadAll() once
+        }
     }
 }
 

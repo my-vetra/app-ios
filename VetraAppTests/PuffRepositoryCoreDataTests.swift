@@ -44,9 +44,9 @@ final class RepositoryAdditionalTests: XCTestCase {
         let repo = PuffRepositoryCoreData(context: ctx)
 
         measure {
-            for i in 1...5000 {
-                repo.addPuff(.init(puffNumber: i, timestamp: Date(), duration: 0.5, phaseIndex: 0))
-            }
+            repo.addPuffs((1...5000).map { PuffModel(puffNumber: $0, timestamp: Date(), duration: 0.5, phaseIndex: 0) })
+            // wait a tick for observer -> reload
+            waitForMainQueue(0.5)
             XCTAssertEqual(repo.maxPuffNumber(), 5000)
         }
     }
@@ -55,16 +55,17 @@ final class RepositoryAdditionalTests: XCTestCase {
         let ctx = TestCoreDataStack.makeContext()
         let repo = PuffRepositoryCoreData(context: ctx)
 
-        let group = DispatchGroup()
-        // Same-queue Core Data: dispatch async but still on main
-        for i in 1...200 {
-            group.enter()
-            DispatchQueue.main.async {
+        let exp = expectation(description: "bulk")
+        DispatchQueue.global(qos: .userInitiated).async {
+            for i in 1...200 {
                 repo.addPuff(.init(puffNumber: i, timestamp: Date(), duration: 0.1, phaseIndex: 1))
-                group.leave()
             }
+            DispatchQueue.main.async { exp.fulfill() }
         }
-        group.wait()
+        wait(for: [exp], timeout: 5.0)
+
+        // Let the reload happen once
+        waitForMainQueue(0.2)
         XCTAssertEqual(repo.maxPuffNumber(), 200)
     }
 }

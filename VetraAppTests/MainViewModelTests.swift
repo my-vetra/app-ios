@@ -64,12 +64,7 @@ final class MainViewModelTests: XCTestCase {
         try? ctx.save()
 
         let vm = MainViewModel(context: ctx)
-        // Let Combine deliver
-        let exp = expectation(description: "bind")
-        DispatchQueue.main.async { exp.fulfill() }
-        wait(for: [exp], timeout: 0.3)
-
-        // Division by zero should not explode; treat as locked with 0/0
+        waitUntil(vm.currentPhaseIndex == 1, timeout: 1.0)
         XCTAssertEqual(vm.ratioString, "0/0")
     }
 
@@ -97,9 +92,23 @@ final class MainViewModelTests: XCTestCase {
         let repo = ActivePhaseRepositoryCoreData(context: ctx)
         repo.saveActivePhase(.init(phaseIndex: 1, phaseStartDate: Date()))
 
-        let exp2 = expectation(description: "bind2")
-        DispatchQueue.main.async { exp2.fulfill() }
-        wait(for: [exp2], timeout: 0.3)
+        waitUntil(vm.currentPhaseIndex == 1, timeout: 1.0)
         XCTAssertEqual(vm.currentPhaseIndex, 1)
+    }
+    
+    private func waitUntil(_ condition: @autoclosure @escaping () -> Bool,
+                           timeout: TimeInterval = 1.0,
+                           step: TimeInterval = 0.05,
+                           file: StaticString = #file, line: UInt = #line) {
+        let exp = expectation(description: "wait-until")
+        let deadline = Date().addingTimeInterval(timeout)
+
+        func check() {
+            if condition() { exp.fulfill(); return }
+            if Date() >= deadline { exp.fulfill(); return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + step, execute: check)
+        }
+        DispatchQueue.main.async(execute: check)
+        wait(for: [exp], timeout: timeout + step + 0.1)
     }
 }

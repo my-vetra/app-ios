@@ -4,10 +4,13 @@ import CoreData
 
 enum TestCoreDataStack {
     static func makeContainer() -> NSPersistentContainer {
-        // Load the model from the app bundle
-        let model = NSManagedObjectModel.mergedModel(from: [Bundle(for: Puff.self)])!
+        // Use any class defined in the app target to get its bundle
+        let appBundle = Bundle(for: BluetoothManager.self) // or Puff.self, Phase.self, etc.
+        guard let modelURL = appBundle.url(forResource: "VetraApp", withExtension: "momd"),
+              let model = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Could not load VetraApp.momd from app bundle")
+        }
         let container = NSPersistentContainer(name: "VetraApp", managedObjectModel: model)
-
         let desc = NSPersistentStoreDescription()
         desc.type = NSInMemoryStoreType
         container.persistentStoreDescriptions = [desc]

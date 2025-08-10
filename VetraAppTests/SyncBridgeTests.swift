@@ -28,7 +28,7 @@ final class SyncBridgeTests: XCTestCase {
         try? ctx.save()
 
         let src = MockSource()
-        let _ = SyncBridge(source: src, context: ctx)
+        let bridge = SyncBridge(source: src, context: ctx)
 
         // simulate connect
         src.connectionPublisher.send(true)
@@ -41,7 +41,7 @@ final class SyncBridgeTests: XCTestCase {
     func testGapTriggersRetryFromSameLastSeen() {
         let ctx = TestCoreDataStack.makeContext()
         let src = MockSource()
-        let _ = SyncBridge(source: src, context: ctx)
+        let bridge = SyncBridge(source: src, context: ctx)
 
         src.connectionPublisher.send(true) // first request from 0
         waitForMainQueue()
@@ -58,7 +58,7 @@ final class SyncBridgeTests: XCTestCase {
     func testDedupAndAdvanceKeepsPulling() {
         let ctx = TestCoreDataStack.makeContext()
         let src = MockSource()
-        let _ = SyncBridge(source: src, context: ctx)
+        let bridge = SyncBridge(source: src, context: ctx)
 
         src.connectionPublisher.send(true)    // startAfter=0
         waitForMainQueue()
@@ -85,7 +85,7 @@ final class SyncBridgeTests: XCTestCase {
     func testActivePhaseIsSaved() {
         let ctx = TestCoreDataStack.makeContext()
         let src = MockSource()
-        let _ = SyncBridge(source: src, context: ctx)
+        let bridge = SyncBridge(source: src, context: ctx)
 
         let date = Date(timeIntervalSince1970: 12345)
         src.activePhasePublisher.send(ActivePhaseModel(phaseIndex: 3, phaseStartDate: date))
