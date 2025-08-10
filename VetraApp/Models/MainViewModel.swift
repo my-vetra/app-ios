@@ -2,6 +2,12 @@
 import SwiftUI
 import Combine
 
+enum TimerState {
+    case locked
+    case unlocked
+}
+
+
 class MainViewModel: ObservableObject {
     @Published var state: TimerState = .locked
     @Published var progress: Double    = 0
