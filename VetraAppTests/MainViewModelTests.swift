@@ -6,7 +6,7 @@ import CoreData
 final class MainViewModelTests: XCTestCase {
 
     func testStateAndRatioFromPuffsAndActivePhase() {
-        let ctx = TestCoreDataStack.makeContext()
+        let ctx = TestCoreDataStack().makeContext()
 
         // Seed session with one phase: maxPuffs=3, duration=60s
         let session = SessionLifetime(context: ctx)
@@ -47,7 +47,7 @@ final class MainViewModelTests: XCTestCase {
     }
 
     func testMaxPuffsZeroTreatAsLocked() {
-        let ctx = TestCoreDataStack.makeContext()
+        let ctx = TestCoreDataStack().makeContext()
 
         let session = SessionLifetime(context: ctx)
         session.userId = "u"
@@ -69,7 +69,8 @@ final class MainViewModelTests: XCTestCase {
     }
 
     func testPhaseChangeRecomputes() {
-        let ctx = TestCoreDataStack.makeContext()
+        let stack = TestCoreDataStack()
+        let ctx = stack.makeContext()
         let session = SessionLifetime(context: ctx)
         session.userId = "u"
         let p0 = Phase(context: ctx); p0.index = 0; p0.duration = 60; p0.maxPuffs = 3
@@ -89,9 +90,9 @@ final class MainViewModelTests: XCTestCase {
         XCTAssertEqual(vm.currentPhaseIndex, 0)
 
         // Move to phase 1 via repo
-        let repo = ActivePhaseRepositoryCoreData(context: ctx)
+        let bg_ctx = stack.makeBackgroundContext()
+        let repo = ActivePhaseRepositoryCoreData(context: bg_ctx)
         repo.saveActivePhase(.init(phaseIndex: 1, phaseStartDate: Date()))
-
         waitUntil(vm.currentPhaseIndex == 1, timeout: 1.0)
         XCTAssertEqual(vm.currentPhaseIndex, 1)
     }

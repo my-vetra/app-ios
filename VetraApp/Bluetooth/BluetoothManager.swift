@@ -1,20 +1,28 @@
-// =============================================
-// BluetoothManager.swift (App) — with logging
-// =============================================
+//
+//  BluetoothManager.swift
+//  VetraApp
+//
+//  Non-UI BLE central manager with logging, restoration, and safe timers.
+//
 
-import SwiftUI
+import Foundation
 import CoreBluetooth
 import Combine
+import UIKit
+import os
 
 final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+    // Published state surfaced to app
     @Published var isConnected = false
     @Published var peripheralName: String?
+    @Published var bluetoothState: CBManagerState = .unknown
 
     // BLE Core
     private var centralManager: CBCentralManager!
     private var peripheral: CBPeripheral?
+    private let centralQueue = DispatchQueue(label: "ble.central.queue")
 
-    // Service/Characteristics
+    // Services/Characteristics
     private let serviceUUID = CBUUID(string: "12345678-1234-5678-1234-56789abcdef0")
 
     private let ntpCharacteristicUUID         = CBUUID(string: "12345678-1234-5678-1234-56789abcdef2")
@@ -29,27 +37,49 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
     private var puffsCharacteristic: CBCharacteristic?
     private var activePhaseCharacteristic: CBCharacteristic?
 
-    private var keepAliveTimer: Timer?
+    // KeepAlive via GCD timer (safe on non-main queue)
+    private var keepAliveSource: DispatchSourceTimer?
 
     // Publishers to the bridge
     let puffsBatchPublisher        = PassthroughSubject<[PuffModel], Never>()
     let puffsBackfillComplete      = PassthroughSubject<Void, Never>()
     let activePhasePublisher       = PassthroughSubject<ActivePhaseModel, Never>()
     let connectionPublisher        = PassthroughSubject<Bool, Never>()
-    
+
+    // Request queueing
     private var pendingPuffsRequests: [Data] = []
     private var isPuffsNotifyOn = false // true for either notifications or indications
-    
-    // Native Bluetooth state
-    @Published var bluetoothState: CBManagerState = .unknown
 
-    // MARK: - Log helper
-    private func log(_ msg: String) { print("[BLE] \(msg)") }
+    // Reconnect backoff (for didFailToConnect)
+    private var connectRetryAttempts = 0
+    private let connectRetryMax = 3
+
+    // Logging
+    private let logger = Logger(subsystem: "com.vetra.app", category: "BLE")
+    private func log(_ msg: String) { logger.debug("\(msg, privacy: .public)") }
 
     override init() {
         super.init()
-        self.centralManager = CBCentralManager(delegate: self, queue: .main)
-        log("Init CBCentralManager")
+
+        NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground),
+                                               name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground),
+                                               name: UIApplication.willEnterForegroundNotification, object: nil)
+
+        centralManager = CBCentralManager(
+            delegate: self,
+            queue: centralQueue,
+            options: [
+                CBCentralManagerOptionRestoreIdentifierKey: "com.vetra.central"
+            ]
+        )
+        
+        bluetoothState = centralManager.state
+    }
+
+    deinit {
+        stopKeepAliveTimer()
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Public API used by SyncBridge
@@ -69,7 +99,7 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         pendingPuffsRequests.append(payload)
         flushPuffsQueueIfReady()
     }
-    
+
     private func flushPuffsQueueIfReady() {
         guard isPuffsNotifyOn,
               let peripheral = peripheral,
@@ -84,7 +114,7 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         }
     }
 
-    /// One-shot read of ActivePhase (for instant UI bootstrap).
+    /// One-shot read of ActivePhase (for instant bootstrap).
     func readActivePhase() {
         guard let peripheral, let c = activePhaseCharacteristic else { return }
         log("Reading ActivePhase characteristic…")
@@ -94,15 +124,46 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
     // MARK: - Central delegate
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        log("Central state -> \(central.state)")
+        log("Central state -> \(central.state.rawValue)")
         if central.state == .poweredOn {
             bluetoothState = .poweredOn
             log("Powered on; scanning for service \(serviceUUID)")
             centralManager.scanForPeripherals(withServices: [serviceUUID], options: nil)
         } else {
             bluetoothState = .unknown
-            isConnected = false
-            log("State \(central.state) — marked disconnected")
+            // publish on main to avoid thread-safety issues with @Published
+            DispatchQueue.main.async {
+                self.isConnected = false
+                self.connectionPublisher.send(false)
+            }
+            log("State \(central.state.rawValue) — marked disconnected")
+        }
+    }
+
+    func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
+        log("willRestoreState keys: \(Array(dict.keys))")
+
+        if let restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral],
+           let p = restoredPeripherals.first {
+            self.peripheral = p
+            p.delegate = self
+            self.peripheralName = p.name ?? "Vetra"
+
+            if p.state == .connected {
+                DispatchQueue.main.async {
+                    self.isConnected = true
+                    self.connectionPublisher.send(true)
+                }
+                log("Restored connected peripheral; discovering services…")
+                p.discoverServices([serviceUUID])
+                startKeepAliveTimer()
+            } else {
+                log("Restored peripheral not connected; rescanning…")
+                central.scanForPeripherals(withServices: [serviceUUID], options: nil)
+            }
+        } else {
+            log("No peripherals in restore state; scanning…")
+            central.scanForPeripherals(withServices: [serviceUUID], options: nil)
         }
     }
 
@@ -112,17 +173,36 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         self.peripheral?.delegate = self
         log("Discovered \(peripheral.name ?? "Unknown") RSSI=\(RSSI)")
         centralManager.stopScan()
+        connectRetryAttempts = 0
         centralManager.connect(peripheral, options: nil)
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        self.isConnected = true
-        self.connectionPublisher.send(true)
-        peripheralName = peripheral.name ?? "Vetra"
-        log("Connected to \(peripheralName!); discovering services…")
+        connectRetryAttempts = 0
+        DispatchQueue.main.async {
+            self.isConnected = true
+            self.connectionPublisher.send(true)
+            self.peripheralName = peripheral.name ?? "Vetra"
+        }
+        log("Connected to \(peripheral.name ?? "Vetra"); discovering services…")
         peripheral.discoverServices([serviceUUID])
-        // Re-enable KeepAlive schedule (safe no-op until char is discovered)
         startKeepAliveTimer()
+    }
+
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        log("didFailToConnect \(peripheral.name ?? "Unknown"): \(error?.localizedDescription ?? "nil")")
+        guard connectRetryAttempts < connectRetryMax else {
+            log("Connect retry max reached; rescanning.")
+            central.scanForPeripherals(withServices: [serviceUUID], options: nil)
+            return
+        }
+        connectRetryAttempts += 1
+        let delay = 0.5 + Double.random(in: 0...0.5)
+        centralQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self else { return }
+            self.log("Retrying connect attempt \(self.connectRetryAttempts)/\(self.connectRetryMax) after \(String(format: "%.2f", delay))s")
+            central.connect(peripheral, options: nil)
+        }
     }
 
     func centralManager(_ central: CBCentralManager,
@@ -132,15 +212,15 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         DispatchQueue.main.async {
             self.isConnected = false
             self.connectionPublisher.send(false)
-            self.keepAliveTimer?.invalidate()
-            self.keepAliveTimer = nil
-
-            // Reset readiness + drop queued requests (fresh handshake next time)
-            self.isPuffsNotifyOn = false
-            self.pendingPuffsRequests.removeAll()
-
-            self.centralManager.scanForPeripherals(withServices: [self.serviceUUID], options: nil)
         }
+
+        stopKeepAliveTimer()
+
+        // Reset readiness + drop queued requests (fresh handshake next time)
+        isPuffsNotifyOn = false
+        pendingPuffsRequests.removeAll()
+
+        central.scanForPeripherals(withServices: [serviceUUID], options: nil)
     }
 
     // MARK: - Peripheral delegate
@@ -184,7 +264,6 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
                 activePhaseCharacteristic = c
                 peripheral.setNotifyValue(true, for: c)
                 log("Subscribed to ActivePhase; bootstrapping read…")
-                // Optional immediate bootstrap
                 readActivePhase()
 
             default:
@@ -193,36 +272,7 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        log("didUpdateValueFor \(characteristic.uuid) (len=\(characteristic.value?.count ?? 0), error: \(String(describing: error)))")
-        guard error == nil, let data = characteristic.value else { return }
-
-        if characteristic.uuid == puffsCharacteristicUUID {
-            log("RX Puffs payload: \(data.count) bytes")
-            if characteristic.uuid == puffsCharacteristicUUID {
-                print("[BLE] RAW Puffs (\(data.count)B): \(hex(data))")
-                handlePuffsPayload(data)
-            }
-            
-            handlePuffsPayload(data)
-
-        } else if characteristic.uuid == activePhaseCharacteristicUUID {
-            if let ap = Self.parseActivePhase(data) {
-                log("RX ActivePhase: phaseIndex=\(ap.phaseIndex), start=\(ap.phaseStartDate)")
-                activePhasePublisher.send(ap)
-            }
-
-        } else if characteristic.uuid == ntpCharacteristicUUID {
-            if let s = String(data: data, encoding: .utf8) { log("NTP response: \(s)") }
-
-        } else if characteristic.uuid == keepAliveCharacteristicUUID {
-            log("KeepAlive ack")
-        }
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral,
-                    didUpdateNotificationStateFor characteristic: CBCharacteristic,
-                    error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         log("Notify/Indicate state changed for \(characteristic.uuid): isNotifying=\(characteristic.isNotifying), error=\(String(describing: error))")
         guard error == nil else { return }
 
@@ -234,25 +284,71 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
             }
         } else if characteristic.uuid == activePhaseCharacteristicUUID {
             if characteristic.isNotifying {
-                // Optional: bootstrap the UI instantly
+                // Optional: bootstrap instantly
                 readActivePhase()
             }
+        }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard characteristic.uuid == puffsCharacteristicUUID else { return }
+        if let error {
+            log("Puffs request write failed: \(error.localizedDescription)")
+        } else {
+            log("Puffs request write ACK")
+        }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        log("didUpdateValueFor \(characteristic.uuid) (len=\(characteristic.value?.count ?? 0), error: \(String(describing: error)))")
+        guard error == nil, let data = characteristic.value else { return }
+        if characteristic.uuid == puffsCharacteristicUUID {
+            log("RAW Puffs (\(data.count)B): \(hex(data))")
+            handlePuffsPayload(data)
+        } else if characteristic.uuid == activePhaseCharacteristicUUID {
+            if let ap = Self.parseActivePhase(data) {
+                log("RX ActivePhase: phaseIndex=\(ap.phaseIndex), start=\(ap.phaseStartDate.timeIntervalSince1970)")
+                activePhasePublisher.send(ap)
+            }
+        } else if characteristic.uuid == ntpCharacteristicUUID {
+            if let s = String(data: data, encoding: .utf8) { log("NTP response: \(s)") }
+        } else if characteristic.uuid == keepAliveCharacteristicUUID {
+            log("KeepAlive ack")
         }
     }
 
     // MARK: - KeepAlive
 
     private func startKeepAliveTimer() {
-        keepAliveTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in
-            self?.keepAlive()
+        stopKeepAliveTimer()
+        let src = DispatchSource.makeTimerSource(queue: centralQueue)
+        src.schedule(deadline: .now() + .seconds(20), repeating: .seconds(20))
+        src.setEventHandler { [weak self] in self?.keepAlive() }
+        src.resume()
+        keepAliveSource = src
+        log("KeepAlive timer started (20s, GCD)")
+    }
+
+    private func stopKeepAliveTimer() {
+        if keepAliveSource != nil {
+            keepAliveSource?.cancel()
+            keepAliveSource = nil
+            log("KeepAlive timer stopped")
         }
-        log("KeepAlive timer started (20s)")
     }
 
     private func keepAlive() {
         log("KeepAlive tick — reading keepAlive characteristic…")
         guard let keepAliveChar = keepAliveCharacteristic, let peripheral = peripheral else { return }
         peripheral.readValue(for: keepAliveChar)
+    }
+
+    @objc private func appDidEnterBackground() {
+        stopKeepAliveTimer()
+    }
+
+    @objc private func appWillEnterForeground() {
+        if isConnected { startKeepAliveTimer() }
     }
 
     // MARK: - Parsing
@@ -283,7 +379,8 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
 
     static func parsePuffsBatch(_ data: Data) -> [PuffModel]? {
         var idx = 0
-        guard data.count >= 1 else { return nil }
+        // Guard header length before any indexed reads
+        guard data.count >= 1 + 2 + 1 else { return nil }
         let msgType = data.readU8(&idx)
         guard msgType == 0x01 else { return nil }
 
@@ -323,7 +420,7 @@ final class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelega
 
     static func parseActivePhase(_ data: Data) -> ActivePhaseModel? {
         var idx = 0
-        guard data.count >= 5 else { return nil }
+        guard data.count >= 1 + 4 else { return nil }
         let phaseIndex = Int(data.readU8(&idx))
         let startTs    = TimeInterval(data.readLEU32(&idx))
         return ActivePhaseModel(phaseIndex: phaseIndex, phaseStartDate: Date(timeIntervalSince1970: startTs))

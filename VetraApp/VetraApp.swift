@@ -1,18 +1,19 @@
 // VetraApp.swift
 import SwiftUI
 
+
 @main
 struct VetraApp: App {
-    let persistenceController = PersistenceController.shared
-
-    init() {
-        persistenceController.seedInitialData()
-    }
+    let persistence = PersistenceController.shared
     
+    init() {
+        persistence.seedInitialData()
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            ContentView(writerContextProvider: {persistence.writerContext})
+                .environment(\.managedObjectContext, persistence.container.viewContext)
         }
     }
 }

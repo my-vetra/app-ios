@@ -1,10 +1,25 @@
-// =============================================
-// SyncBridge.swift — with logging
-// =============================================
+//
+//  SyncBridge.swift
+//  VetraApp
+//
+//  Bridges BLE events into Core Data repositories and manages delta requests.
+//  Uses a background writer context; puffs are processed off-main.
+//
 
 import Foundation
 import Combine
 import CoreData
+import os
+
+/// BLE source abstraction (for DI/testing)
+protocol PuffsSource {
+    var puffsBatchPublisher: PassthroughSubject<[PuffModel], Never> { get }
+    var puffsBackfillComplete: PassthroughSubject<Void, Never> { get }
+    var activePhasePublisher: PassthroughSubject<ActivePhaseModel, Never> { get }
+    var connectionPublisher: PassthroughSubject<Bool, Never> { get }
+    func requestPuffs(startAfter: UInt16, maxCount: UInt8?)
+    func readActivePhase()
+}
 
 /// Bridges BLE events into Core Data repositories and manages delta requests.
 final class SyncBridge: ObservableObject {
@@ -23,23 +38,18 @@ final class SyncBridge: ObservableObject {
     private let gapRetryMax = 3
     private let gapRetryDelay: TimeInterval = 0.25
 
-    // MARK: - Log helper
-    private func log(_ msg: String) { print("[SyncBridge] \(msg)") }
-    
-    private func dumpInserted(_ items: [PuffModel]) {
-        guard !items.isEmpty else { return }
-        let iso = ISO8601DateFormatter()
-        print("[SyncBridge] INSERT \(items.count) puff(s)")
-        for p in items {
-            let tsStr  = iso.string(from: p.timestamp)
-            let durStr = String(format: "%.3f", p.duration)
-            print("[SyncBridge]   #\(p.puffNumber) ts=\(tsStr) dur=\(durStr)s phase=\(p.phaseIndex)")
-        }
-    }
+    // Processing queue (off-main)
+    private let processingQueue: DispatchQueue
+
+    // Logging
+    private let logger = Logger(subsystem: "com.vetra.app", category: "Sync")
+    private func log(_ msg: String) { logger.debug("\(msg, privacy: .public)") }
 
     // MARK: - Inits
-    /// App code path
-    init(bluetoothManager: BluetoothManager, context: NSManagedObjectContext) {
+    /// App code path — pass the background writer context here.
+    init(bluetoothManager: BluetoothManager, context: NSManagedObjectContext,
+         processingQueue: DispatchQueue = DispatchQueue(label: "sync.bridge.queue")) {
+        self.processingQueue = processingQueue
         self.source   = bluetoothManager
         self.puffRepo = PuffRepositoryCoreData(context: context)
         self.activeRepo = ActivePhaseRepositoryCoreData(context: context)
@@ -49,7 +59,9 @@ final class SyncBridge: ObservableObject {
     }
 
     /// Test code path
-    init(source: PuffsSource, context: NSManagedObjectContext) {
+    init(source: PuffsSource, context: NSManagedObjectContext,
+         processingQueue: DispatchQueue = DispatchQueue(label: "sync.bridge.queue")) {
+        self.processingQueue = processingQueue
         self.source   = source
         self.puffRepo = PuffRepositoryCoreData(context: context)
         self.activeRepo = ActivePhaseRepositoryCoreData(context: context)
@@ -62,7 +74,7 @@ final class SyncBridge: ObservableObject {
     private func bind() {
         // Connection lifecycle → request deltas
         source.connectionPublisher
-            .receive(on: DispatchQueue.main)
+            .receive(on: processingQueue)
             .sink { [weak self] connected in
                 guard let self else { return }
                 if connected {
@@ -80,24 +92,23 @@ final class SyncBridge: ObservableObject {
 
         // ActivePhase updates
         source.activePhasePublisher
-            .receive(on: DispatchQueue.main)
+            .receive(on: processingQueue)
             .sink { [weak self] ap in
-                self?.log("ActivePhase update -> index=\(ap.phaseIndex) start=\(ap.phaseStartDate)")
                 self?.handleActivePhase(ap)
             }
             .store(in: &cancellables)
 
-        // Puffs stream
+        // Puffs stream — process off-main to keep UI smooth
         source.puffsBatchPublisher
-            .receive(on: DispatchQueue.main)
+            .receive(on: processingQueue)
             .sink { [weak self] batch in
                 self?.handlePuffs(batch)
             }
             .store(in: &cancellables)
 
-        // Backfill done (device should send as Indication)
+        // Backfill done
         source.puffsBackfillComplete
-            .receive(on: DispatchQueue.main)
+            .receive(on: processingQueue)
             .sink { [weak self] in
                 self?.isCatchingUp = false
                 self?.log("Backfill complete. Live mode engaged.")
@@ -113,58 +124,58 @@ final class SyncBridge: ObservableObject {
             return
         }
 
-        self.log("ActivePhase update -> index=\(ap.phaseIndex) start=\(ap.phaseStartDate)")
+        self.log("ActivePhase update -> index=\(ap.phaseIndex) start=\(ap.phaseStartDate.timeIntervalSince1970)")
         self.activeRepo.saveActivePhase(ap)
     }
 
-    
     private func handlePuffs(_ items: [PuffModel]) {
         guard !items.isEmpty else { return }
-
         var expected = lastSeen + 1
         var toInsert: [PuffModel] = []
-
-        log("handlePuffs: received=\(items.count) expectedFirst=\(expected) batchFirst=\(items.first!.puffNumber) batchLast=\(items.last!.puffNumber)")
 
         for p in items {
             switch p.puffNumber {
             case ..<expected:
-                // head overlap / duplicate — ignore
                 continue
-
             case expected:
-                // exactly next — accumulate (contiguous segment)
-                toInsert.append(p)
-                expected += 1
-
+                toInsert.append(p); expected += 1
             default:
-                // true gap (> expected) — backoff & retry from lastSeen
+                insertValidPuffs()
                 log("Gap detected: expected=\(expected) got=\(p.puffNumber). Requesting from lastSeen=\(lastSeen) with backoff…")
                 requestFromLastSeen(withBackoff: true)
                 return
             }
         }
 
-        if !toInsert.isEmpty {
-            // persist in one shot
+        insertValidPuffs()
+
+        if isCatchingUp {
+            log("Still catching up — requesting from lastSeen=\(lastSeen)")
+            requestFromLastSeen(withBackoff: false)
+        }
+
+        func insertValidPuffs() {
+            guard !toInsert.isEmpty else { return }
             puffRepo.addPuffs(toInsert)
-            dumpInserted(toInsert)      // <— add this line
+            dumpInserted(toInsert)
             lastSeen = toInsert.last!.puffNumber
             gapRetryCount = 0
-            log("Inserted \(toInsert.count) puff(s); lastSeen -> \(lastSeen)")
+            toInsert.removeAll()
+        }
+    }
 
-            if isCatchingUp {
-                log("Still catching up — requesting from lastSeen=\(lastSeen)")
-                requestFromLastSeen(withBackoff: false)
-            }
+    private func dumpInserted(_ items: [PuffModel]) {
+        guard !items.isEmpty else { return }
+        let iso = ISO8601DateFormatter()
+        print("[SyncBridge] INSERT \(items.count) puff(s)")
+        for p in items {
+            let tsStr  = iso.string(from: p.timestamp)
+            let durStr = String(format: "%.3f", p.duration)
+            print("[SyncBridge]   #\(p.puffNumber) ts=\(tsStr) dur=\(durStr)s phase=\(p.phaseIndex)")
         }
     }
 
     // MARK: - Request helpers
-    private func requestFromLastSeen() {
-        requestFromLastSeen(withBackoff: false)
-    }
-
     private func requestFromLastSeen(withBackoff: Bool) {
         if withBackoff {
             gapRetryCount += 1
@@ -176,7 +187,6 @@ final class SyncBridge: ObservableObject {
                     self.log("Re-requested from lastSeen=\(self.lastSeen) after backoff=\(self.gapRetryDelay)s")
                 }
             } else {
-                // give up for now; next connect or explicit request will retry
                 log("Backoff max reached; pausing re-requests. lastSeen=\(lastSeen)")
                 gapRetryCount = 0
             }
@@ -185,16 +195,6 @@ final class SyncBridge: ObservableObject {
             log("Requested from lastSeen=\(lastSeen) (no backoff)")
         }
     }
-}
-
-// MARK: - BLE source abstraction (for DI/testing)
-protocol PuffsSource {
-    var puffsBatchPublisher: PassthroughSubject<[PuffModel], Never> { get }
-    var puffsBackfillComplete: PassthroughSubject<Void, Never> { get }
-    var activePhasePublisher: PassthroughSubject<ActivePhaseModel, Never> { get }
-    var connectionPublisher: PassthroughSubject<Bool, Never> { get }
-    func requestPuffs(startAfter: UInt16, maxCount: UInt8?)
-    func readActivePhase()
 }
 
 // Make the real Bluetooth manager the source

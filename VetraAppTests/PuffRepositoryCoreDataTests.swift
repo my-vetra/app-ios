@@ -5,7 +5,7 @@ import CoreData
 final class PuffRepositoryCoreDataTests: XCTestCase {
 
     func testMaxAndExists() {
-        let ctx = TestCoreDataStack.makeContext()
+        let ctx = TestCoreDataStack().makeBackgroundContext()
         let repo = PuffRepositoryCoreData(context: ctx)
 
         XCTAssertEqual(repo.maxPuffNumber(), 0)
@@ -16,7 +16,7 @@ final class PuffRepositoryCoreDataTests: XCTestCase {
     }
 
     func testLinksToExistingPhase() {
-        let ctx = TestCoreDataStack.makeContext()
+        let ctx = TestCoreDataStack().makeBackgroundContext()
 
         // create Phase index 2
         let phase = Phase(context: ctx)
@@ -40,7 +40,7 @@ final class PuffRepositoryCoreDataTests: XCTestCase {
 final class RepositoryAdditionalTests: XCTestCase {
 
     func testAddManyPuffsPerformance() {
-        let ctx = TestCoreDataStack.makeContext()
+        let ctx = TestCoreDataStack().makeBackgroundContext()
         let repo = PuffRepositoryCoreData(context: ctx)
 
         measure {
@@ -50,7 +50,7 @@ final class RepositoryAdditionalTests: XCTestCase {
     }
 
     func testAddPuffsFastNoCrash() {
-        let ctx = TestCoreDataStack.makeContext()
+        let ctx = TestCoreDataStack().makeBackgroundContext()
         let repo = PuffRepositoryCoreData(context: ctx)
 
         let exp = expectation(description: "bulk")
