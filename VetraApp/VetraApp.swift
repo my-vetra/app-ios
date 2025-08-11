@@ -1,16 +1,14 @@
-//
-//  cleanbreakApp.swift
-//  cleanbreak
-//
-//  Created by user270007 on 2/9/25.
-//
-
+// VetraApp.swift
 import SwiftUI
 
 @main
 struct VetraApp: App {
     let persistenceController = PersistenceController.shared
 
+    init() {
+        persistenceController.seedInitialData()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

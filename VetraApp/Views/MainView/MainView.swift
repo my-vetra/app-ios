@@ -3,11 +3,9 @@ import CoreData
 
 struct MainView: View {
     @StateObject private var vm: MainViewModel
-    @StateObject private var bridge: SyncBridge
 
-    init(context: NSManagedObjectContext, bluetoothManager: BluetoothManager) {
+    init(context: NSManagedObjectContext) {
         _vm = StateObject(wrappedValue: MainViewModel(context: context))
-        _bridge = StateObject(wrappedValue: SyncBridge(bluetoothManager: bluetoothManager, context: context))
     }
     
         var color: Color {
@@ -44,6 +42,14 @@ struct MainView: View {
                 .frame(width: 300, height: 50)
                 
                 Spacer()
+                
+                Text("Phase: \(vm.currentPhaseIndex)")
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(.gray)
+                .frame(width: 300, height: 50)
+                
+                Spacer()
 
                 TimerArc(
                     state:    vm.state,
@@ -71,7 +77,7 @@ struct MainView: View {
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
         let ctx = PersistenceController.preview.container.viewContext
-        MainView(context: ctx, bluetoothManager: BluetoothManager())
+        MainView(context: ctx)
             .environment(\.managedObjectContext, ctx)
     }
 }

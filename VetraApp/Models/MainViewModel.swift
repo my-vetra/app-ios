@@ -36,6 +36,9 @@ class MainViewModel: ObservableObject {
         bind()
         startTimer()
     }
+    
+    // MARK: - Log helper
+    private func log(_ msg: String) { print("[MainViewModel] \(msg)") }
 
     private func bind() {
         sessionRepo.loadSession()
@@ -82,6 +85,8 @@ class MainViewModel: ObservableObject {
         // Count puffs that belong to the current phase (puffs carry phaseIndex)
         let taken = puffs.lazy.filter { $0.phaseIndex == active.phaseIndex }.count
         let maxP  = phase.maxPuffs
+
+        log("Total puffs read: \(puffRepo.maxPuffNumber())")
 
         state = (taken >= maxP) ? .locked : .unlocked
         username = session.userId

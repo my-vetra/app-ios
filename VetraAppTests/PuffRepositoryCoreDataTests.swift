@@ -10,9 +10,9 @@ final class PuffRepositoryCoreDataTests: XCTestCase {
 
         XCTAssertEqual(repo.maxPuffNumber(), 0)
 
-        repo.addPuff(.init(puffNumber: 5, timestamp: Date(), duration: 1, phaseIndex: 0))
-        XCTAssertTrue(repo.exists(puffNumber: 5))
-        XCTAssertEqual(repo.maxPuffNumber(), 5)
+        repo.addPuff(.init(puffNumber: 1, timestamp: Date(), duration: 1, phaseIndex: 0), synchronously: true)
+        XCTAssertTrue(repo.exists(puffNumber: 1))
+        XCTAssertEqual(repo.maxPuffNumber(), 1)
     }
 
     func testLinksToExistingPhase() {
@@ -26,7 +26,7 @@ final class PuffRepositoryCoreDataTests: XCTestCase {
         try? ctx.save()
 
         let repo = PuffRepositoryCoreData(context: ctx)
-        repo.addPuff(.init(puffNumber: 10, timestamp: Date(), duration: 1.2, phaseIndex: 2))
+        repo.addPuff(.init(puffNumber: 10, timestamp: Date(), duration: 1.2, phaseIndex: 2), synchronously: true)
 
         // fetch saved Puff entity and verify relationship
         let req: NSFetchRequest<Puff> = Puff.fetchRequest()
@@ -44,9 +44,7 @@ final class RepositoryAdditionalTests: XCTestCase {
         let repo = PuffRepositoryCoreData(context: ctx)
 
         measure {
-            repo.addPuffs((1...5000).map { PuffModel(puffNumber: $0, timestamp: Date(), duration: 0.5, phaseIndex: 0) })
-            // wait a tick for observer -> reload
-            waitForMainQueue(0.5)
+            repo.addPuffs((1...5000).map { PuffModel(puffNumber: $0, timestamp: Date(), duration: 0.5, phaseIndex: 0) }, synchronously: true)
             XCTAssertEqual(repo.maxPuffNumber(), 5000)
         }
     }
@@ -58,14 +56,11 @@ final class RepositoryAdditionalTests: XCTestCase {
         let exp = expectation(description: "bulk")
         DispatchQueue.global(qos: .userInitiated).async {
             for i in 1...200 {
-                repo.addPuff(.init(puffNumber: i, timestamp: Date(), duration: 0.1, phaseIndex: 1))
+                repo.addPuff(.init(puffNumber: i, timestamp: Date(), duration: 0.1, phaseIndex: 1), synchronously: true)
             }
             DispatchQueue.main.async { exp.fulfill() }
         }
         wait(for: [exp], timeout: 5.0)
-
-        // Let the reload happen once
-        waitForMainQueue(0.2)
         XCTAssertEqual(repo.maxPuffNumber(), 200)
     }
 }

@@ -100,14 +100,3 @@ final class SyncBridgeTests: XCTestCase {
         XCTAssertEqual(ap?.phaseStartDate, date)
     }
 }
-
-import XCTest
-
-extension XCTestCase {
-    /// Wait one turn of the main queue so Combine .receive(on: .main) can deliver.
-    func waitForMainQueue(_ timeout: TimeInterval = 0.2) {
-        let exp = expectation(description: "main-queue-drain")
-        DispatchQueue.main.async { exp.fulfill() }
-        wait(for: [exp], timeout: timeout)
-    }
-}
