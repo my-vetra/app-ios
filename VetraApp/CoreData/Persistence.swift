@@ -53,11 +53,6 @@ final class PersistenceController {
             session.addToPhases(phase)
         }
 
-        // Seed mock ActivePhase
-        let active = ActivePhase(context: viewContext)
-        active.phaseIndex = 0
-        active.phaseStartDate = Date()
-
         do {
             try viewContext.save()
         } catch {
@@ -107,7 +102,7 @@ final class PersistenceController {
         defaultPhaseDuration: TimeInterval = 120,
         defaultMaxPuffs: Int = 10,
         initialActivePhaseIndex: Int = 0,
-        userId: String = "default-user"
+        userId: String = "test-user"
     ) {
         let ctx = container.viewContext
         ctx.perform {
@@ -117,12 +112,15 @@ final class PersistenceController {
             let hasPhases = ((try? ctx.count(for: phaseReq)) ?? 0) > 0
 
             if !hasPhases {
-                for i in 0..<phaseCount {
+                for i in 1..<phaseCount + 1 {
                     let p = Phase(context: ctx)
                     p.index    = Int16(i)
                     p.duration = defaultPhaseDuration
                     p.maxPuffs = Int16(defaultMaxPuffs)
                 }
+//                let phaseRepo = PhaseRepositoryCoreData(context: self.writerContext) <- phase repo + context gets torn down before it can save
+                let phaseRepo = PhaseRepositoryCoreData(context: ctx)
+                phaseRepo.updatePhase(.init(phaseIndex: 1, phaseStartDate: Date()), synchronously: true) // without sync: true - changes comes through but UI doesn't update
             }
 
             // 2) SessionLifetime — create once
@@ -140,29 +138,7 @@ final class PersistenceController {
                 allPhasesReq.sortDescriptors = [NSSortDescriptor(keyPath: \Phase.index, ascending: true)]
                 ((try? ctx.fetch(allPhasesReq)) ?? []).forEach { session.addToPhases($0) }
             }
-
-            // 3) ActivePhase — keep existing index if present; otherwise use initialActivePhaseIndex (both clamped)
-            let activeReq: NSFetchRequest<ActivePhase> = ActivePhase.fetchRequest()
             
-            let existing: ActivePhase? = (try? ctx.fetch(activeReq))?.first
-            let active = existing ?? ActivePhase(context: ctx)
-            let isNew = (existing == nil)
-
-            // clamp helper
-            let totalPhases = (try? ctx.count(for: Phase.fetchRequest())) ?? phaseCount
-            let clamp: (Int) -> Int16 = { i in
-                Int16(min(max(0, i), max(0, totalPhases - 1)))
-            }
-
-            if active.phaseStartDate == nil {
-                active.phaseStartDate = Date()
-            }
-            
-            let desired = isNew ? initialActivePhaseIndex : Int(active.phaseIndex)
-            let clamped = clamp(desired)
-            if active.phaseIndex != clamped {
-                active.phaseIndex = clamped
-            }
             do {
                 try ctx.save()
             } catch {

@@ -14,6 +14,7 @@ struct PuffModel: Identifiable {
 struct PhaseModel: Identifiable {
     let phaseIndex: Int
     let duration: TimeInterval
+    let startDate: Date?
     let maxPuffs: Int
     var puffs: [PuffModel]
     var puffsTaken: Int { puffs.count }
@@ -29,27 +30,31 @@ struct SessionLifetimeModel: Identifiable {
     var id: String { userId }
 }
 
-struct ActivePhaseModel {
+struct PartialPhaseModel {
     var phaseIndex: Int
     var phaseStartDate: Date
 }
 
 // MARK: - Protocols
 protocol PhaseRepositoryProtocol {
-  func fetchPhases() -> AnyPublisher<[PhaseModel], Never>
+    func loadPhases() -> AnyPublisher<[PhaseModel], Never>
+    func loadActivePhase() -> AnyPublisher<PhaseModel, Never>
+    func updatePhase(_ activePhase: PartialPhaseModel, synchronously: Bool)
+    func updatePhases(_ activePhases: [PartialPhaseModel], synchronously: Bool)
+    func getActivePhaseIndex() -> Int
 }
 protocol SessionLifetimeRepositoryProtocol {
-  func loadSession() -> AnyPublisher<SessionLifetimeModel, Never>
+    func loadSession() -> AnyPublisher<SessionLifetimeModel, Never>
 }
 protocol ActivePhaseRepositoryProtocol {
-  func loadActivePhase() -> AnyPublisher<ActivePhaseModel, Never>
-  func saveActivePhase(_ active: ActivePhaseModel)
-  func activePhaseIndex() -> Int   // -1 if none present
+    func loadActivePhase() -> AnyPublisher<PartialPhaseModel, Never>
+    func saveActivePhase(_ active: PartialPhaseModel)
+    func activePhaseIndex() -> Int   // -1 if none present
 }
 protocol PuffRepositoryProtocol {
     func loadPuffs() -> AnyPublisher<[PuffModel], Never>
-    func maxPuffNumber() -> Int
     func addPuff(_ puff: PuffModel, synchronously: Bool)
     func addPuffs(_ puffs: [PuffModel], synchronously: Bool)
     func exists(puffNumber: Int) -> Bool
+    func maxPuffNumber() -> Int
 }

@@ -14,7 +14,7 @@ final class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol
 
     init(context: NSManagedObjectContext) {
         self.context = context
-        loadFromStoreAndPublish()
+        context.perform{ self.loadFromStoreAndPublish() }
 
         // Observe ALL saves, but:
         //  - ignore saves from THIS context
@@ -54,52 +54,51 @@ final class SessionLifetimeRepositoryCoreData: SessionLifetimeRepositoryProtocol
     }
 
     private func loadFromStoreAndPublish() {
-        context.perform {
-            let request: NSFetchRequest<SessionLifetime> = SessionLifetime.fetchRequest()
-            request.fetchLimit = 1
-            request.relationshipKeyPathsForPrefetching = ["phases", "phases.puff"]
+        let request: NSFetchRequest<SessionLifetime> = SessionLifetime.fetchRequest()
+        request.fetchLimit = 1
+        request.relationshipKeyPathsForPrefetching = ["phases", "phases.puff"]
 
-            guard let entity = try? self.context.fetch(request).first else {
-                DispatchQueue.main.async {
-                    self.subject.send(.init(userId: "", allPhases: [], startedAt: Date(),
-                                            totalPuffsTaken: 0, phasesCompleted: 0))
-                }
-                return
+        guard let entity = try? self.context.fetch(request).first else {
+            DispatchQueue.main.async {
+                self.subject.send(.init(userId: "", allPhases: [], startedAt: Date(),
+                                        totalPuffsTaken: 0, phasesCompleted: 0))
             }
+            return
+        }
 
-            let phaseEntities = (entity.phases?.array as? [Phase] ?? [])
-            let phases: [PhaseModel] = phaseEntities.map { phase in
-                let puffEntities = (phase.puff?.array as? [Puff] ?? []).sorted {
-                    let at = $0.timestamp ?? .distantPast
-                    let bt = $1.timestamp ?? .distantPast
-                    return at == bt ? $0.puffNumber < $1.puffNumber : at < bt
-                }
-                let puffs = puffEntities.map { puff in
-                    PuffModel(
-                        puffNumber: Int(puff.puffNumber),
-                        timestamp: puff.timestamp ?? Date(),
-                        duration: puff.duration,
-                        phaseIndex: Int(phase.index)
-                    )
-                }
-                return PhaseModel(
-                    phaseIndex: Int(phase.index),
-                    duration: phase.duration,
-                    maxPuffs: Int(phase.maxPuffs),
-                    puffs: puffs
+        let phaseEntities = (entity.phases?.array as? [Phase] ?? [])
+        let phases: [PhaseModel] = phaseEntities.map { phase in
+            let puffEntities = (phase.puff?.array as? [Puff] ?? []).sorted {
+                let at = $0.timestamp ?? .distantPast
+                let bt = $1.timestamp ?? .distantPast
+                return at == bt ? $0.puffNumber < $1.puffNumber : at < bt
+            }
+            let puffs = puffEntities.map { puff in
+                PuffModel(
+                    puffNumber: Int(puff.puffNumber),
+                    timestamp: puff.timestamp ?? Date(),
+                    duration: puff.duration,
+                    phaseIndex: Int(phase.index)
                 )
             }
-
-            let model = SessionLifetimeModel(
-                userId: entity.userId ?? "",
-                allPhases: phases,
-                startedAt: entity.startedAt ?? Date(),
-                totalPuffsTaken: Int(entity.totalPuffsTaken),
-                phasesCompleted: Int(entity.phasesCompleted)
+            return PhaseModel(
+                phaseIndex: Int(phase.index),
+                duration: phase.duration,
+                startDate: phase.startDate,
+                maxPuffs: Int(phase.maxPuffs),
+                puffs: puffs
             )
-
-            DispatchQueue.main.async { self.subject.send(model) }
         }
+
+        let model = SessionLifetimeModel(
+            userId: entity.userId ?? "",
+            allPhases: phases,
+            startedAt: entity.startedAt ?? Date(),
+            totalPuffsTaken: Int(entity.totalPuffsTaken),
+            phasesCompleted: Int(entity.phasesCompleted)
+        )
+
+        DispatchQueue.main.async { self.subject.send(model) }
     }
 
     private func noteTouchesSessionOrPhaseOrPuff(_ note: Notification) -> Bool {

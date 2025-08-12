@@ -10,7 +10,7 @@ final class SyncBridgeTests: XCTestCase {
     final class MockSource: PuffsSource {
         let puffsBatchPublisher = PassthroughSubject<[PuffModel], Never>()
         let puffsBackfillComplete = PassthroughSubject<Void, Never>()
-        let activePhasePublisher = PassthroughSubject<ActivePhaseModel, Never>()
+        let activePhasePublisher = PassthroughSubject<PartialPhaseModel, Never>()
         let connectionPublisher = PassthroughSubject<Bool, Never>()
 
         var requests: [(UInt16, UInt8?)] = []
@@ -86,7 +86,7 @@ final class SyncBridgeTests: XCTestCase {
         let bridge = SyncBridge(source: src, context: ctx, processingQueue: testQueue)
 
         let date = Date(timeIntervalSince1970: 12345)
-        src.activePhasePublisher.send(ActivePhaseModel(phaseIndex: 3, phaseStartDate: date)); drain(testQueue)
+        src.activePhasePublisher.send(PartialPhaseModel(phaseIndex: 3, phaseStartDate: date)); drain(testQueue)
 
 
         // fetch from store

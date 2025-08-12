@@ -8,7 +8,7 @@ final class SyncBridgeEdgeCaseTests: XCTestCase {
     final class MockSource: PuffsSource {
         let puffsBatchPublisher = PassthroughSubject<[PuffModel], Never>()
         let puffsBackfillComplete = PassthroughSubject<Void, Never>()
-        let activePhasePublisher = PassthroughSubject<ActivePhaseModel, Never>()
+        let activePhasePublisher = PassthroughSubject<PartialPhaseModel, Never>()
         let connectionPublisher = PassthroughSubject<Bool, Never>()
 
         var requests: [(UInt16, UInt8?)] = []

@@ -3,7 +3,7 @@
 //  VetraApp
 //
 //  Bridges BLE events into Core Data repositories and manages delta requests.
-//  Uses a background writer context; puffs are processed off-main.
+//  Uses a background writer context; processed off-main.
 //
 
 import Foundation
@@ -12,29 +12,33 @@ import CoreData
 import os
 
 /// BLE source abstraction (for DI/testing)
-protocol PuffsSource {
-    var puffsBatchPublisher: PassthroughSubject<[PuffModel], Never> { get }
-    var puffsBackfillComplete: PassthroughSubject<Void, Never> { get }
-    var activePhasePublisher: PassthroughSubject<ActivePhaseModel, Never> { get }
+protocol DataSource {
+    var puffBatchPublisher: PassthroughSubject<[PuffModel], Never> { get }
+    var puffBackfillComplete: PassthroughSubject<Void, Never> { get }
+    var phaseBatchPublisher: PassthroughSubject<[PartialPhaseModel], Never> { get }
+    var phaseBackfillComplete: PassthroughSubject<Void, Never> { get }
     var connectionPublisher: PassthroughSubject<Bool, Never> { get }
     func requestPuffs(startAfter: UInt16, maxCount: UInt8?)
-    func readActivePhase()
+    func requestPhases(startAfter: UInt16, maxCount: UInt8?)
 }
 
 /// Bridges BLE events into Core Data repositories and manages delta requests.
 final class SyncBridge: ObservableObject {
     // MARK: - Dependencies
-    private let source: PuffsSource
+    private let source: DataSource
     private let puffRepo: PuffRepositoryCoreData
-    private let activeRepo: ActivePhaseRepositoryCoreData
+    private let phaseRepo: PhaseRepositoryCoreData
 
     // MARK: - State
     private var cancellables = Set<AnyCancellable>()
-    private var lastSeen: Int = 0
-    private var isCatchingUp = false
+    private var lastSeenPuff: Int = 0
+    private var isPuffsCatchingUp = false    
+    private var lastSeenPhase: Int = 0
+    private var isPhaseCatchingUp = false
 
     // Gap retry/backoff
-    private var gapRetryCount = 0
+    private var puffGapRetryCount = 0
+    private var phaseGapRetryCount = 0
     private let gapRetryMax = 3
     private let gapRetryDelay: TimeInterval = 0.25
 
@@ -52,21 +56,25 @@ final class SyncBridge: ObservableObject {
         self.processingQueue = processingQueue
         self.source   = bluetoothManager
         self.puffRepo = PuffRepositoryCoreData(context: context)
-        self.activeRepo = ActivePhaseRepositoryCoreData(context: context)
-        self.lastSeen = puffRepo.maxPuffNumber()
-        log("Init(app): lastSeen=\(self.lastSeen)")
+        self.phaseRepo = PhaseRepositoryCoreData(context: context)
+        self.lastSeenPuff = puffRepo.maxPuffNumber()
+        self.lastSeenPhase = phaseRepo.getActivePhaseIndex()
+        log("Init(test): lastSeenPuff=\(self.lastSeenPuff)")
+        log("Init(test): lastSeenPhase=\(self.lastSeenPhase)")
         bind()
     }
 
     /// Test code path
-    init(source: PuffsSource, context: NSManagedObjectContext,
+    init(source: DataSource, context: NSManagedObjectContext,
          processingQueue: DispatchQueue = DispatchQueue(label: "sync.bridge.queue")) {
         self.processingQueue = processingQueue
         self.source   = source
         self.puffRepo = PuffRepositoryCoreData(context: context)
-        self.activeRepo = ActivePhaseRepositoryCoreData(context: context)
-        self.lastSeen = puffRepo.maxPuffNumber()
-        log("Init(test): lastSeen=\(self.lastSeen)")
+        self.phaseRepo = PhaseRepositoryCoreData(context: context)
+        self.lastSeenPuff = puffRepo.maxPuffNumber()
+        self.lastSeenPhase = phaseRepo.getActivePhaseIndex()
+        log("Init(test): lastSeenPuff=\(self.lastSeenPuff)")
+        log("Init(test): lastSeenPhase=\(self.lastSeenPhase)")
         bind()
     }
 
@@ -78,59 +86,97 @@ final class SyncBridge: ObservableObject {
             .sink { [weak self] connected in
                 guard let self else { return }
                 if connected {
-                    self.lastSeen = self.puffRepo.maxPuffNumber()
-                    self.log("Connected. lastSeen=\(self.lastSeen). Reading ActivePhase + requesting backfill…")
-                    self.source.readActivePhase()
-                    self.isCatchingUp = true
-                    self.source.requestPuffs(startAfter: UInt16(clamping: self.lastSeen), maxCount: 50)
+                    self.lastSeenPuff = self.puffRepo.maxPuffNumber()
+                    self.lastSeenPhase = self.phaseRepo.getActivePhaseIndex()
+                    self.log("Connected. lastSeenPuff=\(self.lastSeenPuff) requesting backfill…")
+                    self.log("Connected. lastSeenPhase=\(self.lastSeenPhase) requesting backfill…")
+                    self.isPuffsCatchingUp = true
+                    self.isPhaseCatchingUp = true
+                    self.source.requestPuffs(startAfter: UInt16(clamping: self.lastSeenPuff), maxCount: 50)
+                    self.source.requestPhases(startAfter: UInt16(clamping: self.lastSeenPhase), maxCount: 50)
                 } else {
-                    self.isCatchingUp = false
+                    self.isPuffsCatchingUp = false
+                    self.isPhaseCatchingUp = false
                     self.log("Disconnected.")
                 }
             }
             .store(in: &cancellables)
 
-        // ActivePhase updates
-        source.activePhasePublisher
-            .receive(on: processingQueue)
-            .sink { [weak self] ap in
-                self?.handleActivePhase(ap)
-            }
-            .store(in: &cancellables)
-
         // Puffs stream — process off-main to keep UI smooth
-        source.puffsBatchPublisher
+        source.puffBatchPublisher
             .receive(on: processingQueue)
             .sink { [weak self] batch in
                 self?.handlePuffs(batch)
             }
             .store(in: &cancellables)
 
-        // Backfill done
-        source.puffsBackfillComplete
+        // Puffs Backfill done
+        source.puffBackfillComplete
             .receive(on: processingQueue)
             .sink { [weak self] in
-                self?.isCatchingUp = false
-                self?.log("Backfill complete. Live mode engaged.")
+                self?.isPuffsCatchingUp = false
+                self?.log("Puff Backfill complete. Live mode engaged.")
+            }
+            .store(in: &cancellables)
+
+        // Phase stream — process off-main to keep UI smooth
+        source.phaseBatchPublisher
+            .receive(on: processingQueue)
+            .sink { [weak self] batch in
+                self?.handlePhases(batch)
+            }
+            .store(in: &cancellables)
+
+        // Phase Backfill done
+        source.phaseBackfillComplete
+            .receive(on: processingQueue)
+            .sink { [weak self] in
+                self?.isPhaseCatchingUp = false
+                self?.log("Phase Backfill complete. Live mode engaged.")
             }
             .store(in: &cancellables)
     }
 
     // MARK: - Delta ingest
-    private func handleActivePhase(_ ap: ActivePhaseModel) {
-        let current = self.activeRepo.activePhaseIndex()
-        guard ap.phaseIndex > current else {
-            self.log("ActivePhase ignored (new=\(ap.phaseIndex) <= current=\(current))")
-            return
+    private func handlePhases(_ items: [PartialPhaseModel]) {
+        guard !items.isEmpty else { return }
+        var expected = lastSeenPhase + 1
+        var toUpdate: [PartialPhaseModel] = []
+
+        for p in items {
+            switch p.phaseIndex {
+            case ..<expected:
+                continue
+            case expected:
+                toUpdate.append(p);
+                expected += 1
+            default:
+                updateValidPhases()
+                log("Gap detected: expected=\(expected) got=\(p.phaseIndex). Requesting from lastSeenPhase=\(lastSeenPhase) with backoff…")
+                requestFromLastSeenPhase(withBackoff: true)
+                return
+            }
         }
 
-        self.log("ActivePhase update -> index=\(ap.phaseIndex) start=\(ap.phaseStartDate.timeIntervalSince1970)")
-        self.activeRepo.saveActivePhase(ap)
+        updateValidPhases()
+
+        if isPhaseCatchingUp {
+            log("Still catching up — requesting from lastSeenPhase=\(lastSeenPhase)")
+            requestFromLastSeenPhase(withBackoff: false)
+        }
+
+        func updateValidPhases() {
+            guard !toUpdate.isEmpty else { return }
+            phaseRepo.updatePhases(toUpdate)
+            lastSeenPhase = toUpdate.last!.phaseIndex
+            phaseGapRetryCount = 0
+            toUpdate.removeAll()
+        }
     }
 
     private func handlePuffs(_ items: [PuffModel]) {
         guard !items.isEmpty else { return }
-        var expected = lastSeen + 1
+        var expected = lastSeenPuff + 1
         var toInsert: [PuffModel] = []
 
         for p in items {
@@ -141,61 +187,68 @@ final class SyncBridge: ObservableObject {
                 toInsert.append(p); expected += 1
             default:
                 insertValidPuffs()
-                log("Gap detected: expected=\(expected) got=\(p.puffNumber). Requesting from lastSeen=\(lastSeen) with backoff…")
-                requestFromLastSeen(withBackoff: true)
+                log("Gap detected: expected=\(expected) got=\(p.puffNumber). Requesting from lastSeenPuff=\(lastSeenPuff) with backoff…")
+                requestFromLastSeenPuff(withBackoff: true)
                 return
             }
         }
 
         insertValidPuffs()
 
-        if isCatchingUp {
-            log("Still catching up — requesting from lastSeen=\(lastSeen)")
-            requestFromLastSeen(withBackoff: false)
+        if isPuffsCatchingUp {
+            log("Still catching up — requesting from lastSeenPuff=\(lastSeenPuff)")
+            requestFromLastSeenPuff(withBackoff: false)
         }
 
         func insertValidPuffs() {
             guard !toInsert.isEmpty else { return }
             puffRepo.addPuffs(toInsert)
-            dumpInserted(toInsert)
-            lastSeen = toInsert.last!.puffNumber
-            gapRetryCount = 0
+            lastSeenPuff = toInsert.last!.puffNumber
+            puffGapRetryCount = 0
             toInsert.removeAll()
         }
     }
-
-    private func dumpInserted(_ items: [PuffModel]) {
-        guard !items.isEmpty else { return }
-        let iso = ISO8601DateFormatter()
-        print("[SyncBridge] INSERT \(items.count) puff(s)")
-        for p in items {
-            let tsStr  = iso.string(from: p.timestamp)
-            let durStr = String(format: "%.3f", p.duration)
-            print("[SyncBridge]   #\(p.puffNumber) ts=\(tsStr) dur=\(durStr)s phase=\(p.phaseIndex)")
-        }
-    }
-
     // MARK: - Request helpers
-    private func requestFromLastSeen(withBackoff: Bool) {
+    private func requestFromLastSeenPuff(withBackoff: Bool) {
         if withBackoff {
-            gapRetryCount += 1
-            log("requestFromLastSeen(withBackoff=true) attempt=\(gapRetryCount)/\(gapRetryMax) lastSeen=\(lastSeen)")
-            if gapRetryCount <= gapRetryMax {
+            puffGapRetryCount += 1
+            log("requestFromLastSeenPuff(withBackoff=true) attempt=\(puffGapRetryCount)/\(gapRetryMax) lastSeen=\(lastSeenPuff)")
+            if puffGapRetryCount <= gapRetryMax {
                 DispatchQueue.main.asyncAfter(deadline: .now() + gapRetryDelay) { [weak self] in
                     guard let self else { return }
-                    self.source.requestPuffs(startAfter: UInt16(clamping: self.lastSeen), maxCount: 50)
-                    self.log("Re-requested from lastSeen=\(self.lastSeen) after backoff=\(self.gapRetryDelay)s")
+                    self.source.requestPuffs(startAfter: UInt16(clamping: self.lastSeenPuff), maxCount: 50)
+                    self.log("Re-requested from lastSeenPuff=\(self.lastSeenPuff) after backoff=\(self.gapRetryDelay)s")
                 }
             } else {
-                log("Backoff max reached; pausing re-requests. lastSeen=\(lastSeen)")
-                gapRetryCount = 0
+                log("Backoff max reached; pausing re-requests. lastSeenPuff=\(lastSeenPuff)")
+                puffGapRetryCount = 0
             }
         } else {
-            self.source.requestPuffs(startAfter: UInt16(clamping: self.lastSeen), maxCount: 15)
-            log("Requested from lastSeen=\(lastSeen) (no backoff)")
+            self.source.requestPuffs(startAfter: UInt16(clamping: self.lastSeenPuff), maxCount: 15)
+            log("Requested from lastSeenPuff=\(lastSeenPuff) (no backoff)")
+        }
+    }
+    
+    private func requestFromLastSeenPhase(withBackoff: Bool) {
+        if withBackoff {
+            phaseGapRetryCount += 1
+            log("requestFromLastSeenPhase(withBackoff=true) attempt=\(phaseGapRetryCount)/\(gapRetryMax) lastSeen=\(lastSeenPhase)")
+            if phaseGapRetryCount <= gapRetryMax {
+                DispatchQueue.main.asyncAfter(deadline: .now() + gapRetryDelay) { [weak self] in
+                    guard let self else { return }
+                    self.source.requestPhases(startAfter: UInt16(clamping: self.lastSeenPhase), maxCount: 50)
+                    self.log("Re-requested from lastSeenPhase=\(self.lastSeenPhase) after backoff=\(self.gapRetryDelay)s")
+                }
+            } else {
+                log("Backoff max reached; pausing re-requests. lastSeenPhase=\(lastSeenPhase)")
+                phaseGapRetryCount = 0
+            }
+        } else {
+            self.source.requestPhases(startAfter: UInt16(clamping: self.lastSeenPhase), maxCount: 15)
+            log("Requested from lastSeenPhase=\(lastSeenPhase) (no backoff)")
         }
     }
 }
 
 // Make the real Bluetooth manager the source
-extension BluetoothManager: PuffsSource {}
+extension BluetoothManager: DataSource {}

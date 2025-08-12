@@ -1,6 +1,5 @@
 // MARK: - PuffRepositoryCoreData
 
-import SwiftUI
 import Combine
 import CoreData
 
@@ -12,7 +11,7 @@ final class PuffRepositoryCoreData: PuffRepositoryProtocol {
 
     init(context: NSManagedObjectContext) {
         self.context = context
-        loadFromStoreAndPublish()
+        context.perform{ self.loadFromStoreAndPublish() }
 
         // Observe ALL saves, but:
         //  - ignore saves from THIS context
@@ -50,20 +49,18 @@ final class PuffRepositoryCoreData: PuffRepositoryProtocol {
     func loadPuffs() -> AnyPublisher<[PuffModel], Never> { subject.eraseToAnyPublisher() }
 
     private func loadFromStoreAndPublish() {
-        context.perform {
-            let req: NSFetchRequest<Puff> = Puff.fetchRequest()
-            req.sortDescriptors = [NSSortDescriptor(keyPath: \Puff.timestamp, ascending: true)]
-            let models: [PuffModel] = (try? self.context.fetch(req))?.map {
-                PuffModel(
-                    puffNumber: Int($0.puffNumber),
-                    timestamp: $0.timestamp ?? Date(),
-                    duration:  $0.duration,
-                    // ⚠️ relies on relationship; ensure Phase rows exist
-                    phaseIndex: Int($0.phase?.index ?? 0)
-                )
-            } ?? []
-            DispatchQueue.main.async { self.subject.send(models) }
-        }
+        let req: NSFetchRequest<Puff> = Puff.fetchRequest()
+        req.sortDescriptors = [NSSortDescriptor(keyPath: \Puff.timestamp, ascending: true)]
+        let models: [PuffModel] = (try? self.context.fetch(req))?.map {
+            PuffModel(
+                puffNumber: Int($0.puffNumber),
+                timestamp: $0.timestamp ?? Date(),
+                duration:  $0.duration,
+                // ⚠️ relies on relationship; ensure Phase rows exist
+                phaseIndex: Int($0.phase?.index ?? 0)
+            )
+        } ?? []
+        DispatchQueue.main.async { self.subject.send(models) }
     }
 
     func addPuff(_ puff: PuffModel, synchronously: Bool = false) {

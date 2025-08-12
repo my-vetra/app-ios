@@ -34,12 +34,9 @@
 		9D7964E12E49F57A00A7363B /* PuffRepo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7964E02E49F57A00A7363B /* PuffRepo.swift */; };
 		9D7964E32E49F5B400A7363B /* PhaseRepo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7964E22E49F5B400A7363B /* PhaseRepo.swift */; };
 		9D7964E52E49F5E000A7363B /* SessionLifetimeRepo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7964E42E49F5E000A7363B /* SessionLifetimeRepo.swift */; };
-		9D7964E72E49F5FA00A7363B /* ActivePhaseRepo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7964E62E49F5FA00A7363B /* ActivePhaseRepo.swift */; };
 		9DD1882B2E4838690002E39F /* SyncBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DD1882A2E4838690002E39F /* SyncBridge.swift */; };
 		EF3F05512E1F6A84006BB0BB /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05502E1F6A79006BB0BB /* Model.swift */; };
 		EF3F05C32E1F7416006BB0BB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3F05C22E1F740C006BB0BB /* Persistence.swift */; };
-		EF492D8B2E21C80700E6258E /* ActivePhase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */; };
-		EF492D8C2E21C80700E6258E /* ActivePhase+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D842E21C80700E6258E /* ActivePhase+CoreDataProperties.swift */; };
 		EF492D8D2E21C80700E6258E /* Phase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D852E21C80700E6258E /* Phase+CoreDataClass.swift */; };
 		EF492D8E2E21C80700E6258E /* Phase+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D862E21C80700E6258E /* Phase+CoreDataProperties.swift */; };
 		EF492D8F2E21C80700E6258E /* Puff+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF492D872E21C80700E6258E /* Puff+CoreDataClass.swift */; };
@@ -99,12 +96,9 @@
 		9D7964E02E49F57A00A7363B /* PuffRepo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PuffRepo.swift; sourceTree = "<group>"; };
 		9D7964E22E49F5B400A7363B /* PhaseRepo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseRepo.swift; sourceTree = "<group>"; };
 		9D7964E42E49F5E000A7363B /* SessionLifetimeRepo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionLifetimeRepo.swift; sourceTree = "<group>"; };
-		9D7964E62E49F5FA00A7363B /* ActivePhaseRepo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePhaseRepo.swift; sourceTree = "<group>"; };
 		9DD1882A2E4838690002E39F /* SyncBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBridge.swift; sourceTree = "<group>"; };
 		EF3F05502E1F6A79006BB0BB /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		EF3F05C22E1F740C006BB0BB /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
-		EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivePhase+CoreDataClass.swift"; sourceTree = "<group>"; };
-		EF492D842E21C80700E6258E /* ActivePhase+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivePhase+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		EF492D852E21C80700E6258E /* Phase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Phase+CoreDataClass.swift"; sourceTree = "<group>"; };
 		EF492D862E21C80700E6258E /* Phase+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Phase+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		EF492D872E21C80700E6258E /* Puff+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Puff+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -214,7 +208,6 @@
 				9D7964E02E49F57A00A7363B /* PuffRepo.swift */,
 				9D7964E22E49F5B400A7363B /* PhaseRepo.swift */,
 				9D7964E42E49F5E000A7363B /* SessionLifetimeRepo.swift */,
-				9D7964E62E49F5FA00A7363B /* ActivePhaseRepo.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -222,8 +215,6 @@
 		9D3CB5F42DDAAD1E00211506 = {
 			isa = PBXGroup;
 			children = (
-				EF492D832E21C80700E6258E /* ActivePhase+CoreDataClass.swift */,
-				EF492D842E21C80700E6258E /* ActivePhase+CoreDataProperties.swift */,
 				EF492D852E21C80700E6258E /* Phase+CoreDataClass.swift */,
 				EF492D862E21C80700E6258E /* Phase+CoreDataProperties.swift */,
 				EF492D872E21C80700E6258E /* Puff+CoreDataClass.swift */,
@@ -450,7 +441,6 @@
 			files = (
 				9D0D4A5B2DDAC5DF00534A62 /* SettingsView.swift in Sources */,
 				9D7964E32E49F5B400A7363B /* PhaseRepo.swift in Sources */,
-				9D7964E72E49F5FA00A7363B /* ActivePhaseRepo.swift in Sources */,
 				9D0D4A632DDAC5DF00534A62 /* LeaderboardView.swift in Sources */,
 				9D0D4A102DDAC3AE00534A62 /* BluetoothManager.swift in Sources */,
 				9D0D4A5E2DDAC5DF00534A62 /* MainView.swift in Sources */,
@@ -465,8 +455,6 @@
 				9D7964E52E49F5E000A7363B /* SessionLifetimeRepo.swift in Sources */,
 				9D3CB6012DDAAD1E00211506 /* VetraApp.swift in Sources */,
 				EF3F05C32E1F7416006BB0BB /* Persistence.swift in Sources */,
-				EF492D8B2E21C80700E6258E /* ActivePhase+CoreDataClass.swift in Sources */,
-				EF492D8C2E21C80700E6258E /* ActivePhase+CoreDataProperties.swift in Sources */,
 				EF492D8D2E21C80700E6258E /* Phase+CoreDataClass.swift in Sources */,
 				EF492D8E2E21C80700E6258E /* Phase+CoreDataProperties.swift in Sources */,
 				EF492D8F2E21C80700E6258E /* Puff+CoreDataClass.swift in Sources */,

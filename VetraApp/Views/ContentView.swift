@@ -13,7 +13,9 @@ struct ContentView: View {
             if bluetoothManager.isConnected {
                 TrackerView().transition(.slide)
             } else {
-                BluetoothView(bluetoothManager: bluetoothManager).transition(.slide)
+//                BluetoothView(bluetoothManager: bluetoothManager).transition(.slide)
+                TrackerView().transition(.slide)
+
             }
         }
         .animation(.easeInOut(duration: 0.35), value: bluetoothManager.isConnected)

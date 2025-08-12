@@ -17,6 +17,7 @@ extension Phase {
     }
 
     @NSManaged public var duration: Double
+    @NSManaged public var startDate: Date?
     @NSManaged public var index: Int16
     @NSManaged public var maxPuffs: Int16
     @NSManaged public var puffsTaken: Int16
