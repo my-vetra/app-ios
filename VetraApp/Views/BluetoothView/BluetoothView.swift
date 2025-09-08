@@ -1,143 +1,175 @@
+//
+//  BluetoothView.swift
+//  VetraApp
+//
+//  Discovery/Connect screen. Shows a scanning ripple until a device is
+//  discovered. When discovered, stops the ripple and presents a clear
+//  "Tap to Connect" affordance. Falls back to system settings if BT off.
+//
+
 import SwiftUI
 
+// MARK: - BluetoothView
+
 struct BluetoothView: View {
+
     @ObservedObject var bluetoothManager: BluetoothManager
-    
-    var deviceName: String {
-            UIDevice.current.name // Returns only 'iPhone' without an entitlement from Apple
-        }
-    
+
+    // MARK: Derived UI State
+
+    /// Show ripple only when Bluetooth is ON, not connected, and no device is currently discovered.
+    private var rippleActive: Bool {
+        bluetoothManager.bluetoothState == .poweredOn &&
+        !bluetoothManager.isConnected &&
+        bluetoothManager.discoveredPeripheralName == nil
+    }
+
+    /// Reserve space below ripple so it doesn’t shift when content changes.
+    private let statusAreaHeight: CGFloat = 160
+
+    private var deviceOwnerName: String {
+        UIDevice.current.name
+    }
+
+    // MARK: Init
+
     init(bluetoothManager: BluetoothManager) {
         self.bluetoothManager = bluetoothManager
     }
 
+    // MARK: Body
+
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color.mint.opacity(0.8), Color.teal]),
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-            if (bluetoothManager.bluetoothState == .poweredOn) {
-                // Bluetooth ON: Show Ripple Effect & Scanning UI
+            LinearGradient(
+                gradient: Gradient(colors: [Color.mint.opacity(0.8), Color.teal]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
-                VStack {
-                    Spacer()
-
-                    // Centered Ripple Effect
-                    RippleEffectView()
-                        .frame(width: 200, height: 200)
-                        .padding()
-
-                    // All text and button below
-                    VStack(spacing: 2) {
-                        // User's iPhone with Icon
-                        HStack {
-                            Image(systemName: deviceName.lowercased()) // iPhone symbol
-                                .font(.title3)
-                                .foregroundColor(.white)
-
-                            Text(deviceName)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                        }
-                        .opacity(0.5)
-
-                        // Discovering Text
-                        Text("Discovering product...")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-
-                        // "CAN'T FIND PRODUCT" Button
-//                        Button(action: {
-//                            // Action for when user can't find device
-//                        }) {
-//                            Text("CAN'T FIND PRODUCT ?")
-//                                .fontWeight(.bold)
-//                                .padding()
-//                                .frame(maxWidth: 240)
-//                                .background(Color.white)
-//                                .foregroundColor(Color.teal)
-//                                .cornerRadius(100)
-//                        }
-//                        .padding(.top, 20) // Space from text above
-                    }
-                    .padding(.horizontal, 40) // Maintain horizontal spacing
-                    .padding(.vertical, 50)
-                    
-                    Spacer()
-//
-//                    HStack(spacing: 20){
-//                        Button(action: {
-//                            isBluetoothEnabled = false// Action for when user can't find device
-//                        }) {
-//                            Text("Turn off Bluetooth")
-//                                .fontWeight(.bold)
-//                                .font(.footnote)
-//                                .foregroundColor(Color.white)
-//                                .cornerRadius(100)
-//                        }
-//
-//                        Button(action: {
-//                            bluetoothManager.isConnected = true
-//                        }) {
-//                            Text("Simulate Connect")
-//                                .fontWeight(.bold)
-//                                .font(.footnote)
-//                                .foregroundColor(Color.white)
-//                                .cornerRadius(100)
-//                        }
-//                    }
-                }
+            if bluetoothManager.bluetoothState == .poweredOn {
+                poweredOnView
             } else {
-               VStack {
-                   Spacer()
-                   Image("bluetooth")
-                       .resizable()
-                       .scaledToFit()
-                       .frame( maxWidth: 50, maxHeight: 100)
-                       .foregroundColor(.white)
-                       .opacity(0.5)
-                   
-                   // All text and button below
-                   VStack(spacing: 2) {
-
-                       // Discovering Text
-                       Text("Turn on Bluetooth to discover nearby product.")
-                           .font(.callout)
-                           .frame(maxWidth:.infinity)
-                           .fontWeight(.semibold)
-                           .foregroundColor(.white)
-
-                       // "CAN'T FIND PRODUCT" Button
-                       Button(action: {
-                           openBluetoothSettings()
-                       }) {
-                           Text("TURN ON")
-                               .fontWeight(.bold)
-                               .padding()
-                               .frame(maxWidth: 120)
-                               .background(Color.white)
-                               .foregroundColor(Color.teal)
-                               .cornerRadius(100)
-                       }
-                       .padding(.top, 20) // Space from text above
-                   }
-                   .padding(.vertical, 50)
-                   
-                   Spacer()
-               }
+                poweredOffView
             }
         }
     }
-    
-    private func openBluetoothSettings() {
-            guard let url = URL(string: "App-Prefs:root=Bluetooth") else { return }
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url)
+
+    // MARK: Subviews
+
+    private var poweredOnView: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Ripple is anchored here, unaffected by status content
+            RippleEffectView(isActive: rippleActive)
+                .frame(width: 200, height: 200)
+            
+            Spacer()
+
+            // Fixed-height area for dynamic status & buttons
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    Image(systemName: "iphone")
+                        .font(.title3)
+                        .foregroundColor(.white)
+
+                    Text(deviceOwnerName)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                }
+                .opacity(0.5)
+
+                if let name = bluetoothManager.discoveredPeripheralName,
+                   !bluetoothManager.isConnected {
+                    Text("Discovered \(name)")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+
+                    Button(action: { bluetoothManager.connectDiscovered() }) {
+                        Text("Tap to Connect")
+                            .font(.headline)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(Color.white)
+                            .foregroundColor(.teal)
+                            .cornerRadius(20)
+                            .shadow(radius: 6)
+                    }
+                    .accessibilityLabel("Connect to \(name)")
+                    .padding(.top, 8)
+                } else {
+                    Text("Discovering product…")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                }
             }
+            .padding(.horizontal, 40)
+            .padding(.top, 8)
+            .frame(maxWidth: .infinity,
+                   maxHeight: statusAreaHeight,
+                   alignment: .top)
+
+            Spacer()
         }
+    }
+
+    private var poweredOffView: some View {
+        VStack {
+            Spacer()
+
+            Image("bluetooth")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 50, maxHeight: 100)
+                .foregroundColor(.white)
+                .opacity(0.5)
+
+            VStack(spacing: 12) {
+                Text("Turn on Bluetooth to discover nearby product.")
+                    .font(.callout)
+                    .frame(maxWidth: .infinity)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+
+                Button(action: openBluetoothSettings) {
+                    Text("TURN ON")
+                        .fontWeight(.bold)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(Color.white)
+                        .foregroundColor(.teal)
+                        .cornerRadius(100)
+                }
+                .padding(.top, 8)
+            }
+            .padding(.vertical, 50)
+
+            Spacer()
+        }
+    }
+
+    // MARK: Actions
+
+    /// Attempts to open Bluetooth settings. Falls back to app settings if needed.
+    private func openBluetoothSettings() {
+        if let url = URL(string: "App-Prefs:root=Bluetooth"),
+           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+            return
+        }
+        if let appSettings = URL(string: UIApplication.openSettingsURLString),
+           UIApplication.shared.canOpenURL(appSettings) {
+            UIApplication.shared.open(appSettings)
+        }
+    }
 }
+
+// MARK: - Preview
 
 #Preview {
     BluetoothView(bluetoothManager: BluetoothManager())

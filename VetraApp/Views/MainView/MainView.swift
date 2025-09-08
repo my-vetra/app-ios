@@ -2,71 +2,53 @@ import SwiftUI
 import CoreData
 
 struct MainView: View {
+    @EnvironmentObject private var bluetooth: BluetoothManager   // ✅ live, ephemeral
     @StateObject private var vm: MainViewModel
 
     init(context: NSManagedObjectContext) {
         _vm = StateObject(wrappedValue: MainViewModel(context: context))
     }
-    
-        var color: Color {
-            return vm.state == .unlocked ? .green : .mint
-            }    //    var color: Gradient = Gradient(colors: [Color.mint.opacity(0.8), Color.teal])
-    
-           private var darkGreen: Color {
-               Color(red: 18/255, green: 24/255, blue: 22/255)
-           }
-    
-           private var darkMint: Color {
-               Color(red: 10/255, green: 20/255, blue: 18/255)
-           }
-    
-           private var backgroundColor: Color {
-               vm.state == .unlocked
-                   ? darkGreen
-                   : darkMint
-           }
 
-    private var arcColor: Color {
-        vm.state == .unlocked ? .green : .mint
-    }
+    private var arcColor: Color { vm.state == .unlocked ? .green : .mint }
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             VStack(spacing: 40) {
-                // 🔑 Use the new computed property here:
-                Text("Connected: \(vm.username)")
-                .font(.title3)
-                .fontWeight(.bold)
-                .foregroundColor(.gray)
-                .frame(width: 300, height: 50)
-                
+                Text(bluetooth.isConnected
+                     ? "Connected: \(bluetooth.peripheralName ?? "—")"
+                     : "Disconnected (last: \(bluetooth.peripheralName ?? "—"))")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.gray)
+                    .frame(width: 300, height: 50)
+
                 Spacer()
-                
+
                 Text("Phase: \(vm.currentPhaseIndex)")
-                .font(.title3)
-                .fontWeight(.bold)
-                .foregroundColor(.gray)
-                .frame(width: 300, height: 50)
-                
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundColor(.gray)
+                    .frame(width: 300, height: 50)
+
                 Spacer()
 
                 TimerArc(
-                    state:    vm.state,
+                    state: vm.state,
                     progress: vm.progress,
-                    time:     vm.ratioString
+                    time: vm.ratioString
                 )
                 .frame(width: 250, height: 250)
-//                .foregroundColor(arcColor)
 
                 DeviceStatusBar(
-                    color:    .gray,
-                    label:    vm.timeRemainingString,
+                    color: .gray,
+                    label: vm.timeRemainingString,
                     progress: vm.timeProgress
                 )
                 .frame(height: 20)
                 .padding(.horizontal)
                 .padding(.bottom, 40)
+
                 Spacer()
             }
         }
@@ -79,6 +61,7 @@ struct MainView_Previews: PreviewProvider {
         let ctx = PersistenceController.preview.container.viewContext
         MainView(context: ctx)
             .environment(\.managedObjectContext, ctx)
+            .environmentObject(BluetoothManager())
     }
 }
 #endif

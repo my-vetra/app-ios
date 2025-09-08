@@ -16,6 +16,8 @@ class MainViewModel: ObservableObject {
     @Published var timeProgress: Double    = 0
     @Published var timeRemainingString: String = "--"
     @Published var username: String = ""
+    @Published var devicename: String = ""
+    @Published var connected: Bool = false
     @Published var currentPhaseIndex: Int = 0
 
     private var session: SessionLifetimeModel?

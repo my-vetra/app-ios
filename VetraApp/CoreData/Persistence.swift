@@ -98,9 +98,9 @@ final class PersistenceController {
     ///   - initialActivePhaseIndex: starting active phase index (will clamp to available range)
     ///   - userId: initial user id for SessionLifetime
     func seedInitialData(
-        phaseCount: Int = 10,
-        defaultPhaseDuration: TimeInterval = 120,
-        defaultMaxPuffs: Int = 10,
+        phaseCount: Int = 6,
+        defaultPhaseDuration: TimeInterval = 60,
+        defaultMaxPuffs: Int = 3,
         initialActivePhaseIndex: Int = 0,
         userId: String = "test-user"
     ) {
@@ -112,7 +112,7 @@ final class PersistenceController {
             let hasPhases = ((try? ctx.count(for: phaseReq)) ?? 0) > 0
 
             if !hasPhases {
-                for i in 1..<phaseCount + 1 {
+                for i in 0..<phaseCount {
                     let p = Phase(context: ctx)
                     p.index    = Int16(i)
                     p.duration = defaultPhaseDuration
@@ -120,7 +120,7 @@ final class PersistenceController {
                 }
 //                let phaseRepo = PhaseRepositoryCoreData(context: self.writerContext) <- phase repo + context gets torn down before it can save
                 let phaseRepo = PhaseRepositoryCoreData(context: ctx)
-                phaseRepo.updatePhase(.init(phaseIndex: 1, phaseStartDate: Date()), synchronously: true) // without sync: true - changes comes through but UI doesn't update
+                phaseRepo.updatePhase(.init(phaseIndex:0, phaseStartDate: Date()), synchronously: true) // without sync: true - changes comes through but UI doesn't update
             }
 
             // 2) SessionLifetime — create once

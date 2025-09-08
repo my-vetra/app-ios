@@ -10,12 +10,10 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            if bluetoothManager.isConnected {
+            if bluetoothManager.everConnected || bluetoothManager.isConnected {
                 TrackerView().transition(.slide)
             } else {
-//                BluetoothView(bluetoothManager: bluetoothManager).transition(.slide)
-                TrackerView().transition(.slide)
-
+                BluetoothView(bluetoothManager: bluetoothManager)
             }
         }
         .animation(.easeInOut(duration: 0.35), value: bluetoothManager.isConnected)
@@ -40,6 +38,7 @@ struct ContentView: View {
                 )
             }
         }
+        .environmentObject(bluetoothManager)
     }
 }
 
@@ -47,4 +46,5 @@ struct ContentView: View {
     let pc = PersistenceController.preview
     return ContentView(writerContextProvider: { pc.writerContext })
         .environment(\.managedObjectContext, pc.container.viewContext)
+        .environmentObject(BluetoothManager())
 }
