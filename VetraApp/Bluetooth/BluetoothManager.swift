@@ -249,7 +249,7 @@ extension BluetoothManager: CBCentralManagerDelegate {
             return
         }
 
-        log("Discovered \(name) RSSI=\(RSSI) — waiting for user to connect")
+//        log("Discovered \(name) RSSI=\(RSSI) — waiting for user to connect")
         // Note: we intentionally keep scanning; presenceTimer expires the popup if the device disappears.
     }
 

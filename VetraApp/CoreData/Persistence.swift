@@ -98,9 +98,9 @@ final class PersistenceController {
     ///   - initialActivePhaseIndex: starting active phase index (will clamp to available range)
     ///   - userId: initial user id for SessionLifetime
     func seedInitialData(
-        phaseCount: Int = 6,
-        defaultPhaseDuration: TimeInterval = 60,
-        defaultMaxPuffs: Int = 3,
+        phaseCount: Int = 21,
+        defaultPhaseDuration: TimeInterval = 360,
+        defaultMaxPuffs: Int = 3000,
         initialActivePhaseIndex: Int = 0,
         userId: String = "test-user"
     ) {
@@ -148,3 +148,5 @@ final class PersistenceController {
         }
     }
 }
+
+//Failed to open URL App-Prefs:root=Bluetooth: Error Domain=FBSOpenApplicationServiceErrorDomain Code=4 "(null)" UserInfo={NSUnderlyingError=0x129024750 {Error Domain=FBSOpenApplicationErrorDomain Code=3 "Request is not trusted." UserInfo={BSErrorCodeDescription=Security, NSLocalizedFailureReason=Request is not trusted.}}, NSLocalizedFailure=The request to open "com.apple.Preferences" failed., FBSErrorContext=147937300, BSErrorCodeDescription=InvalidRequest}
